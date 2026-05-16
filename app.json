@@ -1,0 +1,12 @@
+{
+    "expo": {
+        "name": "BibleLingo",
+        "slug": "BibleLingo",
+        "experiments": {
+            "baseUrl": "/BibleLingo"
+        },
+        "web": {
+            "bundler": "metro"
+        }
+    }
+}
