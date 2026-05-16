@@ -16,11 +16,13 @@ import { computeNextReview } from "./src/utils/srs";
 import { MissingLinkQuestion } from "./src/components/MissingLinkQuestion";
 import { ScribeQuestion } from "./src/components/ScribeQuestion";
 import { GlobalFeedbackSheet } from "./src/components/animations/GlobalFeedbackSheet";
+import { checkAchievements } from "./src/utils/achievementEngine";
+import { LeagueScreen } from "./src/components/LeagueScreen";
 
 type GameMode = "SCRAMBLE" | "MISSING_LINK" | "SCRIBE";
 
 export default function App() {
-  const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson">("path");
+  const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson" | "league">("path");
   const [seenIntros, setSeenIntros] = React.useState<string[]>([]);
   const [currentPhase, setCurrentPhase] = React.useState<"RECOGNITION" | "RECALL">("RECOGNITION");
   const [currentGameMode, setCurrentGameMode] = React.useState<GameMode>("SCRAMBLE");
@@ -39,6 +41,7 @@ export default function App() {
   // Return to path if lesson finishes
   React.useEffect(() => {
     if (isLessonComplete && feedbackStatus === "idle") {
+      checkAchievements();
       setActiveScreen("path");
       setSeenIntros([]);
       setCurrentPhase("RECOGNITION");
@@ -90,6 +93,9 @@ export default function App() {
         lessonStore.getState().nextQuestion();
       }
     } else {
+      if (wasCorrect) {
+        progressStore.getState().incrementPerfectScribes();
+      }
       setCurrentPhase("RECOGNITION");
       lessonStore.getState().nextQuestion();
     }
@@ -182,11 +188,12 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      {activeScreen === "path" ? (
+      
+      {activeScreen === "path" && (
         <PathScreen onStartLesson={() => setActiveScreen("lesson")} />
-      ) : (
-        renderLessonScreen()
       )}
+      {activeScreen === "league" && <LeagueScreen />}
+      {activeScreen === "lesson" && renderLessonScreen()}
       
       {activeScreen === "lesson" && currentQuestionIndex < verses.length && (
         <GlobalFeedbackSheet
@@ -194,6 +201,23 @@ export default function App() {
           targetVerseText={verses[currentQuestionIndex]?.verseText || ""}
           onContinue={handleFeedbackContinue}
         />
+      )}
+
+      {activeScreen !== "lesson" && (
+        <View style={styles.bottomNav}>
+          <TouchableOpacity 
+            style={[styles.navTab, activeScreen === "path" && styles.navTabActive]} 
+            onPress={() => setActiveScreen("path")}
+          >
+            <Text style={[styles.navText, activeScreen === "path" && styles.navTextActive]}>🏠 Path</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.navTab, activeScreen === "league" && styles.navTabActive]} 
+            onPress={() => setActiveScreen("league")}
+          >
+            <Text style={[styles.navText, activeScreen === "league" && styles.navTextActive]}>🏆 League</Text>
+          </TouchableOpacity>
+        </View>
       )}
       
       <DevMenu />
@@ -205,5 +229,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+  },
+  bottomNav: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+    backgroundColor: "#FFF",
+    paddingBottom: Platform.OS === "ios" ? 20 : 0,
+  },
+  navTab: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+  navTabActive: {
+    borderTopWidth: 3,
+    borderTopColor: "#4A90D9",
+    marginTop: -1,
+  },
+  navText: {
+    fontSize: 16,
+    color: "#888",
+    fontWeight: "600",
+  },
+  navTextActive: {
+    color: "#4A90D9",
+    fontWeight: "800",
   },
 });

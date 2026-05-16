@@ -12,12 +12,16 @@ export interface ProgressState {
   xp: number;
   streakDays: number;
   lastPracticeDate: string | null;
+  achievements: string[];
+  perfectScribes: number;
 
   addOrUpdate: (entry: UserProgress) => void;
   addXp: (amount: number) => void;
   updateStreak: () => void;
   fastForward: (days: number) => void;
   reset: () => void;
+  unlockAchievement: (id: string) => void;
+  incrementPerfectScribes: () => void;
 }
 
 export const progressStore = createStore<ProgressState>()(
@@ -27,6 +31,8 @@ export const progressStore = createStore<ProgressState>()(
       xp: 0,
       streakDays: 0,
       lastPracticeDate: null,
+      achievements: [],
+      perfectScribes: 0,
 
       addOrUpdate: (entry) =>
         set((state) => {
@@ -82,7 +88,15 @@ export const progressStore = createStore<ProgressState>()(
           }),
         })),
 
-      reset: () => set({ entries: [], xp: 0, streakDays: 0, lastPracticeDate: null }),
+      reset: () => set({ entries: [], xp: 0, streakDays: 0, lastPracticeDate: null, achievements: [], perfectScribes: 0 }),
+      unlockAchievement: (id) =>
+        set((state) => ({
+          achievements: state.achievements.includes(id)
+            ? state.achievements
+            : [...state.achievements, id],
+        })),
+      incrementPerfectScribes: () =>
+        set((state) => ({ perfectScribes: state.perfectScribes + 1 })),
     }),
     {
       name: "biblelingo-progress-storage",
