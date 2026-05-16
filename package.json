@@ -5,7 +5,7 @@
   "homepage": "https://jjoseph357.github.io/BibleLingo",
   "scripts": {
     "test": "jest",
-    "predeploy": "npx expo export -p web",
+    "predeploy": "npx expo export -p web && node -e \"require('fs').writeFileSync('dist/.nojekyll', '')\"",
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
