@@ -1,0 +1,171 @@
+[
+  {
+    "lessonId": "eog-01",
+    "bookPath": "The Economy of God",
+    "unitTitle": "The Triune God",
+    "verseReference": "2 Cor. 13:14",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Triune God",
+      "Divine Dispensing"
+    ],
+    "decoyWords": [
+      "the mercy of God",
+      "the power of Christ",
+      "the communion of saints",
+      "the blessing of peace"
+    ]
+  },
+  {
+    "lessonId": "eog-02",
+    "bookPath": "The Economy of God",
+    "unitTitle": "The Triune God",
+    "verseReference": "Matt. 28:19",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Triune God",
+      "Baptism"
+    ],
+    "decoyWords": [
+      "the names of God",
+      "the title of the Lord",
+      "the three persons",
+      "the teachings of Jesus"
+    ]
+  },
+  {
+    "lessonId": "eog-03",
+    "bookPath": "The Economy of God",
+    "unitTitle": "God's Economy",
+    "verseReference": "1 Tim. 1:4",
+    "difficulty": "Medium",
+    "themeTags": [
+      "God's Economy"
+    ],
+    "decoyWords": [
+      "the old dispensation",
+      "God's divine plan",
+      "the kingdom of heaven",
+      "the purpose of God"
+    ]
+  },
+  {
+    "lessonId": "eog-04",
+    "bookPath": "The Economy of God",
+    "unitTitle": "God's Economy",
+    "verseReference": "Eph. 1:10",
+    "difficulty": "Hard",
+    "themeTags": [
+      "God's Economy",
+      "Heading Up"
+    ],
+    "decoyWords": [
+      "the dispensation of grace",
+      "to gather all men",
+      "to restore the earth",
+      "to unite the nations"
+    ]
+  },
+  {
+    "lessonId": "eog-05",
+    "bookPath": "The Economy of God",
+    "unitTitle": "The Economy of the Mystery",
+    "verseReference": "Eph. 3:9",
+    "difficulty": "Hard",
+    "themeTags": [
+      "God's Economy",
+      "Mystery"
+    ],
+    "decoyWords": [
+      "the stewardship of grace",
+      "the administration of God",
+      "His divine plan",
+      "the counsel of His will"
+    ]
+  },
+  {
+    "lessonId": "eog-06",
+    "bookPath": "The Economy of God",
+    "unitTitle": "The Two Spirits",
+    "verseReference": "Rom. 8:16",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Two Spirits",
+      "Assurance"
+    ],
+    "decoyWords": [
+      "our human soul",
+      "our inner heart",
+      "our renewed mind",
+      "the sons of men"
+    ]
+  },
+  {
+    "lessonId": "eog-07",
+    "bookPath": "The Economy of God",
+    "unitTitle": "The Two Spirits",
+    "verseReference": "1 Cor. 6:17",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Two Spirits",
+      "Organic Union"
+    ],
+    "decoyWords": [
+      "one living soul",
+      "one physical body",
+      "one renewed mind",
+      "one pure heart"
+    ]
+  },
+  {
+    "lessonId": "eog-08",
+    "bookPath": "The Economy of God",
+    "unitTitle": "The Three Parts of Man",
+    "verseReference": "1 Thes. 5:23",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Tripartite Man",
+      "Sanctification"
+    ],
+    "decoyWords": [
+      "your pure heart",
+      "your sober mind",
+      "your mortal flesh",
+      "your inner strength"
+    ]
+  },
+  {
+    "lessonId": "eog-09",
+    "bookPath": "The Economy of God",
+    "unitTitle": "The Three Parts of Man",
+    "verseReference": "Heb. 4:12",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Tripartite Man",
+      "The Word"
+    ],
+    "decoyWords": [
+      "active and powerful",
+      "flesh and bones",
+      "feelings and emotions",
+      "desires of the mind"
+    ]
+  },
+  {
+    "lessonId": "eog-10",
+    "bookPath": "The Economy of God",
+    "unitTitle": "Regeneration",
+    "verseReference": "John 3:6",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Regeneration",
+      "Two Spirits"
+    ],
+    "decoyWords": [
+      "born of the soul",
+      "born of water",
+      "born of blood",
+      "born of the body"
+    ]
+  }
+]

@@ -1,0 +1,169 @@
+[
+  {
+    "lessonId": "becl-01",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Christ as Our Life",
+    "verseReference": "Col. 3:4",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Christ as Life"
+    ],
+    "decoyWords": [
+      "is our hope",
+      "is our teacher",
+      "as an example",
+      "as our guide"
+    ]
+  },
+  {
+    "lessonId": "becl-02",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Christ as Our Life",
+    "verseReference": "John 14:6",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Christ as Life",
+      "The Way"
+    ],
+    "decoyWords": [
+      "and the truth",
+      "am the door",
+      "and the light",
+      "the right path"
+    ]
+  },
+  {
+    "lessonId": "becl-03",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Christ as Our Life",
+    "verseReference": "Phil. 1:21",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Christ as Life"
+    ],
+    "decoyWords": [
+      "to serve God",
+      "to obey Him",
+      "is to worship",
+      "to follow Christ"
+    ]
+  },
+  {
+    "lessonId": "becl-04",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Calling on the Name of the Lord",
+    "verseReference": "Rom. 10:12",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Calling on the Lord"
+    ],
+    "decoyWords": [
+      "who believe in",
+      "who pray to",
+      "who worship Him",
+      "who seek Him"
+    ]
+  },
+  {
+    "lessonId": "becl-05",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Calling on the Name of the Lord",
+    "verseReference": "Rom. 10:13",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Calling on the Lord"
+    ],
+    "decoyWords": [
+      "whoever believes in",
+      "whoever follows after",
+      "whoever obeys completely",
+      "whoever knows deeply"
+    ]
+  },
+  {
+    "lessonId": "becl-06",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Calling on the Name of the Lord",
+    "verseReference": "Lam. 3:55-56",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Calling on the Lord",
+      "Prayer"
+    ],
+    "decoyWords": [
+      "I cried out",
+      "I whispered softly",
+      "in my thought",
+      "I pleaded loudly"
+    ]
+  },
+  {
+    "lessonId": "becl-07",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Pray-reading the Word",
+    "verseReference": "2 Tim. 3:16",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Pray-reading",
+      "The Word"
+    ],
+    "decoyWords": [
+      "is divinely inspired",
+      "profitable for reproof",
+      "for our guidance",
+      "for strict discipline"
+    ]
+  },
+  {
+    "lessonId": "becl-08",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Pray-reading the Word",
+    "verseReference": "Eph. 6:17-18",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Pray-reading",
+      "The Word",
+      "Spiritual Warfare"
+    ],
+    "decoyWords": [
+      "shield of faith",
+      "breastplate of righteousness",
+      "belt of truth",
+      "shoes of peace"
+    ]
+  },
+  {
+    "lessonId": "becl-09",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "The Human Spirit",
+    "verseReference": "John 4:24",
+    "difficulty": "Medium",
+    "themeTags": [
+      "The Human Spirit",
+      "Worship"
+    ],
+    "decoyWords": [
+      "in their soul",
+      "in their mind",
+      "in absolute sincerity",
+      "in their body"
+    ]
+  },
+  {
+    "lessonId": "becl-10",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "The Human Spirit",
+    "verseReference": "Rom. 8:6",
+    "difficulty": "Medium",
+    "themeTags": [
+      "The Human Spirit",
+      "Life"
+    ],
+    "decoyWords": [
+      "on the soul",
+      "on the heart",
+      "on the body",
+      "on the law"
+    ]
+  }
+]
