@@ -65,7 +65,7 @@ describe("lessonStore", () => {
     expect(s.isLessonComplete).toBe(false);
   });
 
-  test("reaching 0 lives sets isLessonComplete to true", () => {
+  test("reaching 0 lives (or fewer) decrements lives but does not set isLessonComplete to true", () => {
     const { submitAnswer } = lessonStore.getState();
     submitAnswer(false); // lives → 2
     submitAnswer(false); // lives → 1
@@ -73,7 +73,12 @@ describe("lessonStore", () => {
 
     const s = lessonStore.getState();
     expect(s.lives).toBe(0);
-    expect(s.isLessonComplete).toBe(true);
+    expect(s.isLessonComplete).toBe(false);
+
+    submitAnswer(false); // lives → -1
+    const s2 = lessonStore.getState();
+    expect(s2.lives).toBe(-1);
+    expect(s2.isLessonComplete).toBe(false);
   });
 
   test("completing all questions sets isLessonComplete to true", () => {
@@ -93,11 +98,8 @@ describe("lessonStore", () => {
   });
 
   test("actions are no-ops after lesson is complete", () => {
-    // Drain all lives.
-    const { submitAnswer } = lessonStore.getState();
-    submitAnswer(false);
-    submitAnswer(false);
-    submitAnswer(false);
+    // Manually complete the lesson.
+    lessonStore.setState({ isLessonComplete: true });
 
     // Further actions should not mutate state.
     lessonStore.getState().submitAnswer(true);
@@ -123,5 +125,48 @@ describe("lessonStore", () => {
     expect(s.lives).toBe(3);
     expect(s.isLessonComplete).toBe(false);
     expect(s.verses).toHaveLength(3); // verses preserved
+  });
+
+  test("resetLessonState clears all state variables, including verses", () => {
+    const { submitAnswer, nextQuestion, resetLessonState } =
+      lessonStore.getState();
+    submitAnswer(true);
+    nextQuestion();
+    submitAnswer(false);
+
+    resetLessonState();
+
+    const s = lessonStore.getState();
+    expect(s.currentQuestionIndex).toBe(0);
+    expect(s.score).toBe(0);
+    expect(s.lives).toBe(3);
+    expect(s.isLessonComplete).toBe(false);
+    expect(s.verses).toHaveLength(0); // verses fully cleared
+    expect(s.isReviewMode).toBe(false);
+    expect(s.copyrightText).toBe("");
+    expect(s.lastPlayedVerseReference).toBeNull();
+  });
+
+  test("lastPlayedVerseReference records reference on submitAnswer and is cleared on restart/reset", () => {
+    const { submitAnswer, restartLesson, resetLessonState } = lessonStore.getState();
+
+    // 1. Initially null
+    expect(lessonStore.getState().lastPlayedVerseReference).toBeNull();
+
+    // 2. submitAnswer updates it
+    submitAnswer(true, "Rom 8:2");
+    expect(lessonStore.getState().lastPlayedVerseReference).toBe("Rom 8:2");
+
+    submitAnswer(false, "John 1:1");
+    expect(lessonStore.getState().lastPlayedVerseReference).toBe("John 1:1");
+
+    // 3. restartLesson clears it
+    restartLesson();
+    expect(lessonStore.getState().lastPlayedVerseReference).toBeNull();
+
+    // 4. Reset clears it
+    submitAnswer(true, "Rom 8:2");
+    resetLessonState();
+    expect(lessonStore.getState().lastPlayedVerseReference).toBeNull();
   });
 });

@@ -37,15 +37,16 @@ const FAKE_USERS = [
 
 export function LeagueScreen() {
   const xp = useStore(progressStore, s => s.xp);
+  const username = useStore(progressStore, s => s.username);
 
   const leaderboard = useMemo(() => {
     const combined = [
       ...FAKE_USERS,
-      { id: 'me', name: 'You', xp: xp, isMe: true }
+      { id: 'me', name: username || 'You', xp: xp, isMe: true }
     ];
     combined.sort((a, b) => b.xp - a.xp);
     return combined;
-  }, [xp]);
+  }, [xp, username]);
 
   return (
     <View style={styles.container}>

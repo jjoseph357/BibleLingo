@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useStore } from "zustand";
 import { progressStore } from "../stores/progressStore";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 export function TopBar() {
   const { streakDays, lastPracticeDate, xp } = useStore(progressStore);
@@ -24,7 +25,7 @@ export function TopBar() {
 
       {/* Talents / XP Indicator */}
       <View style={styles.badge}>
-        <Text style={styles.icon}>🪙</Text>
+        <FontAwesome5 name="coins" size={18} color="#F5A623" style={styles.iconMargin} />
         <Text style={[styles.text, styles.talentsText]}>{xp}</Text>
       </View>
     </View>
@@ -52,6 +53,9 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 18,
+    marginRight: 6,
+  },
+  iconMargin: {
     marginRight: 6,
   },
   iconInactive: {

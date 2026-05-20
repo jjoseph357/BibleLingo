@@ -13,7 +13,7 @@
 // Misspellings and missing/extra words will NOT match.
 // ============================================================
 
-function normalize(text: string): string {
+export function normalize(text: string): string {
   return text
     .toLowerCase()
     .replace(/[\u2010-\u2015\u2212-]/g, " ") // hyphens & dashes → space

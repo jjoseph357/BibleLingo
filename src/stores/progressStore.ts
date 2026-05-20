@@ -7,13 +7,29 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserProgress } from "../types/models";
 
-export interface ProgressState {
+export interface LessonSession {
+  status: "in_progress" | "completed";
+  verseStepIndex?: Record<string, number>;
+  verseMastery?: Record<
+    string,
+    {
+      level: number;
+      completedModes: string[];
+    }
+  >;
+  progressPercentage: number;
+}export interface ProgressState {
   entries: UserProgress[];
   xp: number;
   streakDays: number;
   lastPracticeDate: string | null;
   achievements: string[];
   perfectScribes: number;
+  toastMessage: string | null;
+  completedLessons?: string[];
+  lessonSessions: Record<string, LessonSession>;
+  earlyMorningsCount: number;
+  username: string | null;
 
   addOrUpdate: (entry: UserProgress) => void;
   addXp: (amount: number) => void;
@@ -22,6 +38,14 @@ export interface ProgressState {
   reset: () => void;
   unlockAchievement: (id: string) => void;
   incrementPerfectScribes: () => void;
+  incrementEarlyMorningsCount: () => void;
+  setUsername: (name: string | null) => void;
+  showToast: (message: string) => void;
+  saveLessonSession: (
+    lessonId: string,
+    session: Omit<LessonSession, "status"> & { status?: "in_progress" | "completed" }
+  ) => void;
+  completeLessonSession: (lessonId: string) => void;
 }
 
 export const progressStore = createStore<ProgressState>()(
@@ -33,6 +57,11 @@ export const progressStore = createStore<ProgressState>()(
       lastPracticeDate: null,
       achievements: [],
       perfectScribes: 0,
+      toastMessage: null,
+      completedLessons: [],
+      lessonSessions: {},
+      earlyMorningsCount: 0,
+      username: null,
 
       addOrUpdate: (entry) =>
         set((state) => {
@@ -76,7 +105,16 @@ export const progressStore = createStore<ProgressState>()(
           }
         }
 
-        set({ streakDays: newStreak, lastPracticeDate: today });
+        const hour = now.getHours();
+        const newEarlyMornings = (hour >= 5 && hour < 7) 
+          ? state.earlyMorningsCount + 1 
+          : state.earlyMorningsCount;
+
+        set({ 
+          streakDays: newStreak, 
+          lastPracticeDate: today,
+          earlyMorningsCount: newEarlyMornings
+        });
       },
 
       fastForward: (days) =>
@@ -88,7 +126,20 @@ export const progressStore = createStore<ProgressState>()(
           }),
         })),
 
-      reset: () => set({ entries: [], xp: 0, streakDays: 0, lastPracticeDate: null, achievements: [], perfectScribes: 0 }),
+      reset: () =>
+        set({
+          entries: [],
+          xp: 0,
+          streakDays: 0,
+          lastPracticeDate: null,
+          achievements: [],
+          perfectScribes: 0,
+          toastMessage: null,
+          completedLessons: [],
+          lessonSessions: {},
+          earlyMorningsCount: 0,
+          username: null,
+        }),
       unlockAchievement: (id) =>
         set((state) => ({
           achievements: state.achievements.includes(id)
@@ -97,10 +148,75 @@ export const progressStore = createStore<ProgressState>()(
         })),
       incrementPerfectScribes: () =>
         set((state) => ({ perfectScribes: state.perfectScribes + 1 })),
+      incrementEarlyMorningsCount: () =>
+        set((state) => ({ earlyMorningsCount: state.earlyMorningsCount + 1 })),
+      setUsername: (name) => set({ username: name }),
+      showToast: (message) => {
+        set({ toastMessage: message });
+        setTimeout(() => {
+          if (get().toastMessage === message) {
+            set({ toastMessage: null });
+          }
+        }, 3000);
+      },
+      saveLessonSession: (lessonId, session) =>
+        set((state) => {
+          const current = state.lessonSessions[lessonId];
+          const status = session.status || (current ? current.status : "in_progress");
+          return {
+            lessonSessions: {
+              ...state.lessonSessions,
+              [lessonId]: {
+                status,
+                verseMastery: session.verseMastery,
+                verseStepIndex: session.verseStepIndex,
+                progressPercentage: session.progressPercentage,
+              },
+            },
+          };
+        }),
+      completeLessonSession: (lessonId) =>
+        set((state) => {
+          const current = state.lessonSessions[lessonId] || {
+            verseMastery: {},
+            verseStepIndex: {},
+            progressPercentage: 1.0,
+          };
+          return {
+            lessonSessions: {
+              ...state.lessonSessions,
+              [lessonId]: {
+                ...current,
+                status: "completed",
+                progressPercentage: 1.0,
+              },
+            },
+          };
+        }),
     }),
     {
       name: "biblelingo-progress-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      migrate: (persistedState: any, version: number) => {
+        if (persistedState && Array.isArray(persistedState.completedLessons)) {
+          const lessonSessions = persistedState.lessonSessions || {};
+          for (const id of persistedState.completedLessons) {
+            if (!lessonSessions[id]) {
+              lessonSessions[id] = {
+                status: "completed",
+                verseMastery: {},
+                verseStepIndex: {},
+                progressPercentage: 1.0,
+              };
+            }
+          }
+          return {
+            ...persistedState,
+            lessonSessions,
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );

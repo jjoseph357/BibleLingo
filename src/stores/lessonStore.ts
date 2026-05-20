@@ -24,12 +24,16 @@ export interface LessonState {
   isLoading: boolean;
   offlineError: string | null;
   copyrightText: string;
+  isReviewMode: boolean;
+  lessonId: string | null;
+  lastPlayedVerseReference: string | null;
 
-  loadLesson: (verses: VerseItem[]) => Promise<void>;
+  loadLesson: (verses: VerseItem[], isReview?: boolean, lessonId?: string | null) => Promise<void>;
   startLesson: (verses: VerseItem[]) => void;
-  submitAnswer: (isCorrect: boolean) => void;
+  submitAnswer: (isCorrect: boolean, verseRef?: string | null) => void;
   nextQuestion: () => void;
   restartLesson: () => void;
+  resetLessonState: () => void;
 }
 
 export const lessonStore = createStore<LessonState>((set, get) => ({
@@ -41,9 +45,12 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
   isLoading: false,
   offlineError: null,
   copyrightText: "",
+  isReviewMode: false,
+  lessonId: null,
+  lastPlayedVerseReference: null,
 
-  loadLesson: async (verses) => {
-    set({ isLoading: true, offlineError: null, copyrightText: "" });
+  loadLesson: async (verses, isReview = false, lessonId = null) => {
+    set({ isLoading: true, offlineError: null, copyrightText: "", isReviewMode: isReview, lessonId });
 
     try {
       const refs = verses.map((v) => v.verseReference);
@@ -63,6 +70,7 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
         isLessonComplete: false,
         isLoading: false,
         copyrightText: copyright,
+        lessonId,
       });
     } catch (err) {
       set({
@@ -83,17 +91,21 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
       isLoading: false,
       offlineError: null,
       copyrightText: "",
+      lessonId: null,
+      lastPlayedVerseReference: null,
     }),
 
-  submitAnswer: (isCorrect) => {
+  submitAnswer: (isCorrect, verseRef = null) => {
     const state = get();
     if (state.isLessonComplete) return;
 
     if (isCorrect) {
-      set({ score: state.score + 1 });
+      set({ score: state.score + 1, lastPlayedVerseReference: verseRef });
+    } else if (state.isReviewMode) {
+      set({ lastPlayedVerseReference: verseRef });
     } else {
       const newLives = state.lives - 1;
-      set({ lives: newLives, isLessonComplete: newLives <= 0 });
+      set({ lives: newLives, lastPlayedVerseReference: verseRef });
     }
   },
 
@@ -116,5 +128,21 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
       lives: INITIAL_LIVES,
       isLessonComplete: false,
       offlineError: null,
+      lastPlayedVerseReference: null,
+    }),
+
+  resetLessonState: () =>
+    set({
+      verses: [],
+      currentQuestionIndex: 0,
+      score: 0,
+      lives: INITIAL_LIVES,
+      isLessonComplete: false,
+      isLoading: false,
+      offlineError: null,
+      copyrightText: "",
+      isReviewMode: false,
+      lessonId: null,
+      lastPlayedVerseReference: null,
     }),
 }));

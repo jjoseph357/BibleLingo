@@ -12,18 +12,20 @@ import { AnimatedWordChip } from "./animations/AnimatedWordChip";
 interface MissingLinkQuestionProps {
   targetVerse: string;
   decoyWords: string[];
+  blankCount?: number;
   onSubmit?: (isCorrect: boolean) => void;
 }
 
 export function MissingLinkQuestion({
   targetVerse,
   decoyWords,
+  blankCount,
   onSubmit,
 }: MissingLinkQuestionProps) {
   // Initialize state once
   const { chunks, blankIndices, initialBank } = useMemo(
-    () => buildMissingLinkState(targetVerse, decoyWords),
-    [targetVerse, decoyWords]
+    () => buildMissingLinkState(targetVerse, decoyWords, blankCount),
+    [targetVerse, decoyWords, blankCount]
   );
 
   const [bankWords, setBankWords] = useState<WordItem[]>(initialBank);

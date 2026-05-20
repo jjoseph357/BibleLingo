@@ -9,14 +9,16 @@ import {
   SectionList,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useStore } from "zustand";
 import { UnitStatus } from "../types/unit";
-import { pathStore, getGroupedLessons } from "../stores/pathStore";
+import { pathStore, getGroupedLessons, ALL_LESSONS } from "../stores/pathStore";
 import { progressStore } from "../stores/progressStore";
 import { lessonStore } from "../stores/lessonStore";
 import { PulsingView } from "./animations/PulsingView";
 import { TopBar } from "./TopBar";
+import { ProgressBar } from "./animations/ProgressBar";
 
 // ── Colour map per status ────────────────────────────────────
 
@@ -36,13 +38,22 @@ const STATUS_LABEL: Record<UnitStatus, string> = {
 
 interface Props {
   onStartLesson?: () => void;
+  onStartReview?: () => void;
 }
 
-export function PathScreen({ onStartLesson }: Props) {
+export function PathScreen({ onStartLesson, onStartReview }: Props) {
   const isAllUnlocked = useStore(pathStore, (s) => s.isAllUnlocked);
   const progressEntries = useStore(progressStore, (s) => s.entries);
+  const lessonSessions = useStore(progressStore, (s) => s.lessonSessions);
 
-  const sections = useMemo(() => getGroupedLessons(), [isAllUnlocked, progressEntries]);
+  const sections = useMemo(() => getGroupedLessons(), [isAllUnlocked, progressEntries, lessonSessions]);
+
+  // Count verses due for review
+  const dueCount = useMemo(() => {
+    const now = new Date();
+    const todayStr = now.toISOString();
+    return progressEntries.filter(e => e.nextReviewDate <= todayStr && e.intervalDays > 0).length;
+  }, [progressEntries]);
 
   // TODO: Replace with real practice-tracking logic.
   const hasPracticedToday = false;
@@ -71,12 +82,23 @@ export function PathScreen({ onStartLesson }: Props) {
         keyExtractor={(item) => item.id}
       contentContainerStyle={styles.list}
       ListHeaderComponent={StreakHeader}
-      renderSectionHeader={({ section }) => (
-        <Text style={styles.sectionHeader}>{section.title}</Text>
-      )}
+      renderSectionHeader={({ section }) => {
+        const total = section.data.length;
+        const completed = section.data.filter(u => u.status === "completed").length;
+        const progress = total > 0 ? completed / total : 0;
+        
+        return (
+          <View style={styles.sectionHeaderContainer}>
+            <Text style={styles.sectionHeader}>{section.title}</Text>
+            <ProgressBar progress={progress} height={6} color="#4A90D9" />
+          </View>
+        );
+      }}
       renderItem={({ item }) => {
         const colors = NODE_COLORS[item.status];
         const isPressable = item.status !== "locked";
+        const session = lessonSessions[item.id];
+        const isCompleted = item.status === "completed" || session?.status === "completed";
 
         return (
           <TouchableOpacity
@@ -93,7 +115,7 @@ export function PathScreen({ onStartLesson }: Props) {
               // If all are completed, load them all (review mode). Otherwise, load pending ones.
               const versesToLoad = pending.length > 0 ? pending : item.lessons;
               
-              lessonStore.getState().loadLesson(versesToLoad);
+              lessonStore.getState().loadLesson(versesToLoad, isCompleted, item.id);
               onStartLesson();
             }}
           >
@@ -109,19 +131,56 @@ export function PathScreen({ onStartLesson }: Props) {
               </Text>
             </View>
 
-            {/* Unit title */}
-            <Text
-              style={[
-                styles.unitTitle,
-                item.status === "locked" && styles.lockedText,
-              ]}
-            >
-              {item.title}
-            </Text>
+            {/* Unit title & Progress */}
+            <View style={styles.titleContainer}>
+              <Text
+                style={[
+                  styles.unitTitle,
+                  item.status === "locked" && styles.lockedText,
+                ]}
+              >
+                {item.title}
+              </Text>
+              {session && session.status === "in_progress" && (
+                <Text style={styles.progressText}>
+                  {Math.round(session.progressPercentage * 100)}% complete
+                </Text>
+              )}
+            </View>
           </TouchableOpacity>
         );
       }}
     />
+
+      {/* Daily Practice FAB */}
+      <TouchableOpacity
+        style={[styles.fab, dueCount === 0 && styles.fabDisabled]}
+        activeOpacity={0.8}
+        onPress={() => {
+          if (dueCount === 0) {
+            Alert.alert("All Caught Up!", "You have no verses due for review. Great job! 🎉");
+            return;
+          }
+          if (!onStartReview) return;
+          
+          const todayStr = new Date().toISOString();
+          const dueRefs = new Set(
+            progressEntries
+              .filter(e => e.nextReviewDate <= todayStr && e.intervalDays > 0)
+              .map(e => e.verseReference)
+          );
+          const dueVerses = ALL_LESSONS.filter(l => dueRefs.has(l.verseReference));
+          lessonStore.getState().loadLesson(dueVerses, true);
+          onStartReview();
+        }}
+      >
+        <Text style={styles.fabText}>📖 Daily Practice</Text>
+        {dueCount > 0 && (
+          <View style={styles.fabBadge}>
+            <Text style={styles.fabBadgeText}>{dueCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
@@ -133,15 +192,18 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     paddingHorizontal: 20,
   },
+  sectionHeaderContainer: {
+    marginTop: 24,
+    marginBottom: 16,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
   sectionHeader: {
     fontSize: 18,
     fontWeight: "700",
     color: "#333",
-    marginTop: 24,
-    marginBottom: 12,
-    paddingBottom: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    marginBottom: 8,
   },
   row: {
     flexDirection: "row",
@@ -161,12 +223,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
   },
+  titleContainer: {
+    marginLeft: 16,
+    flex: 1,
+    justifyContent: "center",
+  },
   unitTitle: {
     fontSize: 16,
     fontWeight: "500",
     color: "#222",
-    marginLeft: 16,
-    flexShrink: 1,
+  },
+  progressText: {
+    fontSize: 12,
+    color: "#4A90D9",
+    fontWeight: "bold",
+    marginTop: 2,
   },
   lockedText: {
     color: "#999",
@@ -195,5 +266,44 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#888",
     marginTop: 2,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 20,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4A90D9",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 28,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+  },
+  fabDisabled: {
+    backgroundColor: "#B0BEC5",
+  },
+  fabText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  fabBadge: {
+    backgroundColor: "#FF3B30",
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 10,
+    paddingHorizontal: 6,
+  },
+  fabBadgeText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "800",
   },
 });

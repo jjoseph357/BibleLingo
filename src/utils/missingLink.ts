@@ -8,13 +8,16 @@ export interface MissingLinkState {
 
 export function buildMissingLinkState(
   targetVerse: string,
-  decoyWords: string[]
+  decoyWords: string[],
+  blankCount?: number
 ): MissingLinkState {
   const chunks = chunkVerseText(targetVerse);
   
-  // Determine how many blanks to have (1 to 3, but not exceeding total chunks)
-  const maxBlanks = Math.min(3, Math.max(1, chunks.length - 1));
-  const numBlanks = Math.floor(Math.random() * maxBlanks) + 1;
+  // Determine how many blanks to have
+  const maxBlanks = Math.min(5, Math.max(1, chunks.length - 1));
+  const numBlanks = blankCount
+    ? Math.min(blankCount, maxBlanks)
+    : Math.min(3, Math.floor(Math.random() * maxBlanks) + 1);
 
   // Select random indices to be blanks
   const indices = Array.from({ length: chunks.length }, (_, i) => i);
