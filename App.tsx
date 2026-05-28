@@ -336,7 +336,11 @@ export default function App() {
           {activeScreen === "lesson" && feedbackVerse && (
             <GlobalFeedbackSheet
               status={feedbackStatus}
-              targetVerseText={feedbackVerse.verseText || ""}
+              targetVerseText={
+                currentMode === "NAVIGATOR_EASY" || currentMode === "NAVIGATOR_HARD"
+                  ? `Correct Reference: ${feedbackVerse.verseReference}`
+                  : feedbackVerse.verseText || ""
+              }
               onContinue={handleFeedbackContinue}
             />
           )}
@@ -490,7 +494,9 @@ function LessonEngine({
         {currentMode !== "INTRO" && (
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
             <Text style={{ fontSize: 20, fontWeight: "bold", color: "#333", flex: 1 }}>
-              Solve: {currentVerse.verseReference}
+              {currentMode === "NAVIGATOR_EASY" || currentMode === "NAVIGATOR_HARD" 
+                ? "Where is this verse found?" 
+                : `Solve: ${currentVerse.verseReference}`}
             </Text>
             {currentVerse.masteryTrack && (
               <View style={{ backgroundColor: "#E8F5E9", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>

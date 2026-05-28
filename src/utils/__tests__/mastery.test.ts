@@ -36,12 +36,12 @@ describe("generateMasteryTrack", () => {
     expect(track[4].missingCount).toBe(2);
   });
 
-  test("Medium verse (15 - 30 words) generates exactly 10 steps and follows rules", () => {
+  test("Medium verse (15 - 30 words) generates exactly 11 steps and follows rules", () => {
     const mediumText =
       "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.";
     const track = generateMasteryTrack(mediumText);
 
-    expect(track).toHaveLength(10);
+    expect(track).toHaveLength(11);
 
     // Rule: NAVIGATOR_EASY is first
     expect(track[0].mode).toBe("NAVIGATOR_EASY");
@@ -64,7 +64,10 @@ describe("generateMasteryTrack", () => {
     expect(scrambleIndices.every((idx) => idx >= 5)).toBe(true);
 
     // Rule: SCRIBE is always the final step
-    expect(track[9].mode).toBe("SCRIBE");
+    expect(track[10].mode).toBe("SCRIBE");
+
+    // Check second NAVIGATOR_HARD
+    expect(track[9].mode).toBe("NAVIGATOR_HARD");
 
     // Rule: missingCount scales up
     expect(track[1].missingCount).toBe(1);
@@ -74,12 +77,12 @@ describe("generateMasteryTrack", () => {
     expect(track[7].missingCount).toBe(4);
   });
 
-  test("Long verse (> 30 words) generates exactly 12 steps and follows rules", () => {
+  test("Long verse (> 30 words) generates exactly 13 steps and follows rules", () => {
     const longText =
       "But you shall receive power when the Holy Spirit has come upon you; and you shall be witnesses to Me in Jerusalem, and in all Judea and Samaria, and to the end of the earth.";
     const track = generateMasteryTrack(longText);
 
-    expect(track).toHaveLength(12);
+    expect(track).toHaveLength(13);
 
     // Rule: NAVIGATOR_EASY is first
     expect(track[0].mode).toBe("NAVIGATOR_EASY");
@@ -102,7 +105,10 @@ describe("generateMasteryTrack", () => {
     expect(scrambleIndices.every((idx) => idx >= 6)).toBe(true);
 
     // Rule: SCRIBE is always the final step
-    expect(track[11].mode).toBe("SCRIBE");
+    expect(track[12].mode).toBe("SCRIBE");
+
+    // Check second NAVIGATOR_HARD
+    expect(track[11].mode).toBe("NAVIGATOR_HARD");
 
     // Rule: missingCount scales up
     expect(track[1].missingCount).toBe(1);

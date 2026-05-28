@@ -50,6 +50,7 @@ export function generateMasteryTrack(verseText: string): MasteryStep[] {
       { mode: "SCRAMBLE", missingCount: 0 },
       { mode: "TYPE_BLANK", missingCount: 4 },
       { mode: "SCRAMBLE", missingCount: 0 },
+      { mode: "NAVIGATOR_HARD", missingCount: 0 },
       { mode: "SCRIBE", missingCount: 0 },
     ];
   } else {
@@ -66,6 +67,7 @@ export function generateMasteryTrack(verseText: string): MasteryStep[] {
       { mode: "TYPE_BLANK", missingCount: 5 },
       { mode: "SCRAMBLE", missingCount: 0 },
       { mode: "TYPE_BLANK", missingCount: 6 },
+      { mode: "NAVIGATOR_HARD", missingCount: 0 },
       { mode: "SCRIBE", missingCount: 0 },
     ];
   }
