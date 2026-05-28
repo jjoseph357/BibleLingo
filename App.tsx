@@ -3,6 +3,7 @@ import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
 import { PathScreen } from "./src/components/PathScreen";
 import { DevMenu } from "./src/components/DevMenu";
 import { WelcomeScreen } from "./src/components/WelcomeScreen";
+import { LibraryScreen } from "./src/components/LibraryScreen";
 
 import { useStore } from "zustand";
 import { lessonStore } from "./src/stores/lessonStore";
@@ -24,8 +25,10 @@ import { ProfileScreen } from "./src/components/ProfileScreen";
 import { ToastNotification } from "./src/components/animations/ToastNotification";
 import { ProgressBar } from "./src/components/animations/ProgressBar";
 import { generateMasteryTrack } from "./src/utils/mastery";
+import { NavigatorEasyQuestion } from "./src/components/NavigatorEasyQuestion";
+import { NavigatorHardQuestion } from "./src/components/NavigatorHardQuestion";
 
-type GameMode = "SCRAMBLE" | "MISSING_LINK" | "TYPE_BLANK" | "SCRIBE";
+type GameMode = "SCRAMBLE" | "MISSING_LINK" | "TYPE_BLANK" | "SCRIBE" | "NAVIGATOR_EASY" | "NAVIGATOR_HARD";
 type ActiveMode = GameMode | "INTRO";
 
 const CYCLE_MODES: GameMode[] = ["SCRAMBLE", "MISSING_LINK", "TYPE_BLANK"];
@@ -37,7 +40,7 @@ interface VerseMasteryState {
 
 export default function App() {
   const username = useStore(progressStore, s => s.username);
-  const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson" | "league" | "profile">("path");
+  const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson" | "league" | "profile" | "library">("path");
   const [feedbackStatus, setFeedbackStatus] = React.useState<"idle" | "correct" | "incorrect">("idle");
 
   // Mastery step index tracking per verse (keyed by verseReference)
@@ -311,6 +314,7 @@ export default function App() {
           )}
           {activeScreen === "league" && <LeagueScreen />}
           {activeScreen === "profile" && <ProfileScreen />}
+          {activeScreen === "library" && <LibraryScreen />}
           {activeScreen === "lesson" && (
             <LessonEngine
               onBackToPath={() => setActiveScreen("path")}
@@ -350,6 +354,12 @@ export default function App() {
                 onPress={() => setActiveScreen("league")}
               >
                 <Text style={[styles.navText, activeScreen === "league" && styles.navTextActive]}>🏆 League</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.navTab, activeScreen === "library" && styles.navTabActive]}
+                onPress={() => setActiveScreen("library")}
+              >
+                <Text style={[styles.navText, activeScreen === "library" && styles.navTextActive]}>📚 Library</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.navTab, activeScreen === "profile" && styles.navTabActive]}
@@ -538,6 +548,20 @@ function LessonEngine({
               <ScribeQuestion
                 key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
                 targetVerse={currentVerse.verseText || ""}
+                onSubmit={handleAnswerSubmit}
+              />
+            )}
+            {currentMode === "NAVIGATOR_EASY" && (
+              <NavigatorEasyQuestion
+                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                targetVerse={currentVerse}
+                onSubmit={handleAnswerSubmit}
+              />
+            )}
+            {currentMode === "NAVIGATOR_HARD" && (
+              <NavigatorHardQuestion
+                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                targetVerse={currentVerse}
                 onSubmit={handleAnswerSubmit}
               />
             )}

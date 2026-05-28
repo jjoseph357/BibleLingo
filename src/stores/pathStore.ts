@@ -8,12 +8,11 @@ import { VerseItem } from "../types/models";
 import { progressStore } from "./progressStore";
 
 import eog1 from "../data/lessons/the-economy-of-god.json";
-import eog2 from "../data/lessons/the-economy-of-god-2.json";
 import becl from "../data/lessons/basic-elements-of-the-christian-life.json";
-import sstjh from "../data/lessons/sst-gr-7-9.json";
-import ssths from "../data/lessons/sst-gr-10-12.json";
+import eol from "../data/lessons/experience-of-life.json";
+import lsr from "../data/lessons/life-study-of-romans.json";
 
-export const ALL_LESSONS = [...sstjh, ...ssths, ...eog1, ...eog2, ...becl] as VerseItem[];
+export const ALL_LESSONS = [...eog1, ...becl, ...eol, ...lsr] as VerseItem[];
 
 export interface GroupedUnit extends Omit<UnitNode, "id"> {
   id: string; // unique string for SectionList key

@@ -81,10 +81,27 @@
     ]
   },
   {
-    "lessonId": "becl-06",
+    "lessonId": "becl-06a",
     "bookPath": "Basic Elements of the Christian Life",
     "unitTitle": "Calling on the Name of the Lord",
-    "verseReference": "Lam. 3:55-56",
+    "verseReference": "Lam. 3:55",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Calling on the Lord",
+      "Prayer"
+    ],
+    "decoyWords": [
+      "I cried out",
+      "I whispered softly",
+      "in my thought",
+      "I pleaded loudly"
+    ]
+  },
+  {
+    "lessonId": "becl-06b",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Calling on the Name of the Lord",
+    "verseReference": "Lam. 3:56",
     "difficulty": "Medium",
     "themeTags": [
       "Calling on the Lord",
@@ -115,10 +132,28 @@
     ]
   },
   {
-    "lessonId": "becl-08",
+    "lessonId": "becl-08a",
     "bookPath": "Basic Elements of the Christian Life",
     "unitTitle": "Pray-reading the Word",
-    "verseReference": "Eph. 6:17-18",
+    "verseReference": "Eph. 6:17",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Pray-reading",
+      "The Word",
+      "Spiritual Warfare"
+    ],
+    "decoyWords": [
+      "shield of faith",
+      "breastplate of righteousness",
+      "belt of truth",
+      "shoes of peace"
+    ]
+  },
+  {
+    "lessonId": "becl-08b",
+    "bookPath": "Basic Elements of the Christian Life",
+    "unitTitle": "Pray-reading the Word",
+    "verseReference": "Eph. 6:18",
     "difficulty": "Hard",
     "themeTags": [
       "Pray-reading",

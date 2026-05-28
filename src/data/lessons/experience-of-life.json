@@ -1,0 +1,257 @@
+[
+    {
+        "lessonId": "eol-01",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Knowing the Cross",
+        "verseReference": "Gal. 2:20",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Crucifixion",
+            "Christ our Life"
+        ],
+        "decoyWords": [
+            "by doing good deeds",
+            "in my own strength",
+            "by the written law",
+            "in human effort"
+        ]
+    },
+    {
+        "lessonId": "eol-02",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Knowing the Cross",
+        "verseReference": "John 12:24",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Death",
+            "Multiplication"
+        ],
+        "decoyWords": [
+            "grows into a tree",
+            "is watered by rain",
+            "remains a single seed",
+            "produces good fruit"
+        ]
+    },
+    {
+        "lessonId": "eol-03",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Knowing the Cross",
+        "verseReference": "Matt. 16:24",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Following Christ",
+            "The Cross"
+        ],
+        "decoyWords": [
+            "let him be good",
+            "let him pray often",
+            "let him read the word",
+            "let him love others"
+        ]
+    },
+    {
+        "lessonId": "eol-04",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Dealing with the Flesh",
+        "verseReference": "Rom. 6:11",
+        "difficulty": "Medium",
+        "themeTags": [
+            "The Flesh",
+            "Reckoning"
+        ],
+        "decoyWords": [
+            "dead to the world",
+            "dead to the law",
+            "alive to good works",
+            "alive in your soul"
+        ]
+    },
+    {
+        "lessonId": "eol-05",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Dealing with the Flesh",
+        "verseReference": "Rom. 8:13",
+        "difficulty": "Medium",
+        "themeTags": [
+            "The Flesh",
+            "By the Spirit"
+        ],
+        "decoyWords": [
+            "by your own willpower",
+            "by keeping the law",
+            "by fasting and prayer",
+            "by doing good deeds"
+        ]
+    },
+    {
+        "lessonId": "eol-06",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Consecration",
+        "verseReference": "Rom. 12:1",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Consecration",
+            "Living Sacrifice"
+        ],
+        "decoyWords": [
+            "present your minds",
+            "present your souls",
+            "present your money",
+            "present your time"
+        ]
+    },
+    {
+        "lessonId": "eol-07",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Consecration",
+        "verseReference": "Rom. 12:2",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Transformation",
+            "The Mind"
+        ],
+        "decoyWords": [
+            "by outward behavior",
+            "by moral improvement",
+            "by learning doctrines",
+            "by emotional feeling"
+        ]
+    },
+    {
+        "lessonId": "eol-08",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Dealing with Self",
+        "verseReference": "2 Cor. 4:16",
+        "difficulty": "Medium",
+        "themeTags": [
+            "The Outer Man",
+            "The Inner Man"
+        ],
+        "decoyWords": [
+            "is getting older",
+            "is being destroyed",
+            "is being glorified",
+            "is becoming perfect"
+        ]
+    },
+    {
+        "lessonId": "eol-09",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Dealing with the World",
+        "verseReference": "Col. 3:3",
+        "difficulty": "Easy",
+        "themeTags": [
+            "The World",
+            "Hidden in God"
+        ],
+        "decoyWords": [
+            "is seen by men",
+            "is full of joy",
+            "is bound by law",
+            "is free from sin"
+        ]
+    },
+    {
+        "lessonId": "eol-10",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Dealing with the World",
+        "verseReference": "Col. 3:4",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Christ our Life",
+            "Glory"
+        ],
+        "decoyWords": [
+            "in the holy city",
+            "in eternal peace",
+            "in human perfection",
+            "in heavenly places"
+        ]
+    },
+    {
+        "lessonId": "eol-11",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "The Filling of the Spirit",
+        "verseReference": "Phil. 2:12",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Salvation",
+            "Fear and Trembling"
+        ],
+        "decoyWords": [
+            "your own perfection",
+            "your good behavior",
+            "your daily sanctification",
+            "your eternal destiny"
+        ]
+    },
+    {
+        "lessonId": "eol-12",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "The Filling of the Spirit",
+        "verseReference": "Phil. 2:13",
+        "difficulty": "Medium",
+        "themeTags": [
+            "The Spirit",
+            "God's Operation"
+        ],
+        "decoyWords": [
+            "to act righteously",
+            "to speak the truth",
+            "to love all men",
+            "to follow the rules"
+        ]
+    },
+    {
+        "lessonId": "eol-13",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Clearing the Past",
+        "verseReference": "1 John 1:7",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Fellowship",
+            "The Blood"
+        ],
+        "decoyWords": [
+            "cleanses our thoughts",
+            "heals our sicknesses",
+            "protects our lives",
+            "makes us perfect"
+        ]
+    },
+    {
+        "lessonId": "eol-14",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "Clearing the Past",
+        "verseReference": "1 John 1:9",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Confession",
+            "Forgiveness"
+        ],
+        "decoyWords": [
+            "He will ignore them",
+            "He will punish us",
+            "He will test us",
+            "He will remember them"
+        ]
+    },
+    {
+        "lessonId": "eol-15",
+        "bookPath": "The Experience of Life",
+        "unitTitle": "The Knowledge of Life",
+        "verseReference": "Rev. 22:1",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Flow of Life",
+            "The Throne"
+        ],
+        "decoyWords": [
+            "from the holy temple",
+            "from the high mountain",
+            "from the golden altar",
+            "from the great sea"
+        ]
+    }
+]

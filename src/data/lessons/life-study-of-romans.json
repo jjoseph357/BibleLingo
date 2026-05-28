@@ -1,0 +1,257 @@
+[
+    {
+        "lessonId": "lsr-01",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Gospel of God",
+        "verseReference": "Rom. 1:1",
+        "difficulty": "Easy",
+        "themeTags": [
+            "The Gospel",
+            "Separation"
+        ],
+        "decoyWords": [
+            "a holy prophet",
+            "called as a priest",
+            "chosen by grace",
+            "a loyal servant"
+        ]
+    },
+    {
+        "lessonId": "lsr-02",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Gospel of God",
+        "verseReference": "Rom. 1:16",
+        "difficulty": "Medium",
+        "themeTags": [
+            "The Gospel",
+            "Salvation"
+        ],
+        "decoyWords": [
+            "the power of faith",
+            "the word of truth",
+            "the hope of glory",
+            "the grace of God"
+        ]
+    },
+    {
+        "lessonId": "lsr-03",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Gospel of God",
+        "verseReference": "Rom. 1:17",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Righteousness",
+            "Faith"
+        ],
+        "decoyWords": [
+            "is justified by works",
+            "is made holy",
+            "lives by the law",
+            "walks in truth"
+        ]
+    },
+    {
+        "lessonId": "lsr-04",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "Condemnation",
+        "verseReference": "Rom. 3:23",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Sin",
+            "Fall of Man"
+        ],
+        "decoyWords": [
+            "have gone astray",
+            "are under the law",
+            "need the grace",
+            "are born in sin"
+        ]
+    },
+    {
+        "lessonId": "lsr-05",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "Justification",
+        "verseReference": "Rom. 3:24",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Justification",
+            "Grace"
+        ],
+        "decoyWords": [
+            "by doing good works",
+            "through keeping the law",
+            "by our own faith",
+            "through human effort"
+        ]
+    },
+    {
+        "lessonId": "lsr-06",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "Reconciliation",
+        "verseReference": "Rom. 5:10",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Reconciliation",
+            "Saved in Life"
+        ],
+        "decoyWords": [
+            "saved by His death",
+            "healed by His stripes",
+            "cleansed by His blood",
+            "forgiven of our sins"
+        ]
+    },
+    {
+        "lessonId": "lsr-07",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "Identification",
+        "verseReference": "Rom. 5:12",
+        "difficulty": "Medium",
+        "themeTags": [
+            "The Fall",
+            "Death"
+        ],
+        "decoyWords": [
+            "the law was given",
+            "the flesh was corrupted",
+            "the world was judged",
+            "the truth was hidden"
+        ]
+    },
+    {
+        "lessonId": "lsr-08",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "Identification",
+        "verseReference": "Rom. 5:17",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Grace",
+            "Reigning in Life"
+        ],
+        "decoyWords": [
+            "will live forever",
+            "will see the kingdom",
+            "will reign in heaven",
+            "will walk in light"
+        ]
+    },
+    {
+        "lessonId": "lsr-09",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "Identification",
+        "verseReference": "Rom. 6:4",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Baptism",
+            "Newness of Life"
+        ],
+        "decoyWords": [
+            "might go to heaven",
+            "might fulfill the law",
+            "might walk in spirit",
+            "might do good works"
+        ]
+    },
+    {
+        "lessonId": "lsr-10",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "Identification",
+        "verseReference": "Rom. 6:6",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Crucifixion",
+            "The Old Man"
+        ],
+        "decoyWords": [
+            "our fleshly nature",
+            "our sinful actions",
+            "our human body",
+            "our natural mind"
+        ]
+    },
+    {
+        "lessonId": "lsr-11",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Spirit",
+        "verseReference": "Rom. 8:2",
+        "difficulty": "Easy",
+        "themeTags": [
+            "The Spirit",
+            "Freedom"
+        ],
+        "decoyWords": [
+            "the word of truth",
+            "the power of God",
+            "the grace of Christ",
+            "the holy angels"
+        ]
+    },
+    {
+        "lessonId": "lsr-12",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Spirit",
+        "verseReference": "Rom. 8:4",
+        "difficulty": "Hard",
+        "themeTags": [
+            "The Spirit",
+            "The Law"
+        ],
+        "decoyWords": [
+            "according to the mind",
+            "according to the soul",
+            "according to the rules",
+            "according to the truth"
+        ]
+    },
+    {
+        "lessonId": "lsr-13",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Spirit",
+        "verseReference": "Rom. 8:6",
+        "difficulty": "Medium",
+        "themeTags": [
+            "The Mind",
+            "Life and Peace"
+        ],
+        "decoyWords": [
+            "is spiritual death",
+            "is human logic",
+            "is natural weakness",
+            "is worldly sorrow"
+        ]
+    },
+    {
+        "lessonId": "lsr-14",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Spirit",
+        "verseReference": "Rom. 8:10",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Christ in Us",
+            "The Spirit"
+        ],
+        "decoyWords": [
+            "your soul is alive",
+            "your mind is renewed",
+            "your flesh is healed",
+            "your heart is pure"
+        ]
+    },
+    {
+        "lessonId": "lsr-15",
+        "bookPath": "Life-Study of Romans",
+        "unitTitle": "The Spirit",
+        "verseReference": "Rom. 8:11",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Resurrection",
+            "The Spirit"
+        ],
+        "decoyWords": [
+            "give you eternal glory",
+            "give life to your soul",
+            "resurrect your spirit",
+            "transform your mind"
+        ]
+    }
+]
