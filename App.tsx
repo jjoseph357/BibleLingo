@@ -12,6 +12,8 @@ import { OfflineError } from "./src/components/OfflineError";
 import { ScrambleQuestion } from "./src/components/ScrambleQuestion";
 import { CopyrightFooter } from "./src/components/CopyrightFooter";
 import { TouchableOpacity, Text, View, KeyboardAvoidingView, Platform, AppState } from "react-native";
+import { useFonts } from "expo-font";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 import { progressStore } from "./src/stores/progressStore";
 import { computeNextReview } from "./src/utils/srs";
@@ -39,6 +41,10 @@ interface VerseMasteryState {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    ...FontAwesome5.font,
+  });
+
   const username = useStore(progressStore, s => s.username);
   const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson" | "league" | "profile" | "library">("path");
   const [feedbackStatus, setFeedbackStatus] = React.useState<"idle" | "correct" | "incorrect">("idle");
@@ -297,6 +303,10 @@ export default function App() {
   };
 
   const feedbackVerse = verses.find(v => v.verseReference === currentVerseRef);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
