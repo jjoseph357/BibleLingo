@@ -12,8 +12,11 @@ import { OfflineError } from "./src/components/OfflineError";
 import { ScrambleQuestion } from "./src/components/ScrambleQuestion";
 import { CopyrightFooter } from "./src/components/CopyrightFooter";
 import { TouchableOpacity, Text, View, KeyboardAvoidingView, Platform, AppState } from "react-native";
+import { useAchievements } from "./src/hooks/useAchievements";
 import { useFonts } from "expo-font";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { audioService } from "./src/services/AudioService";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 import { progressStore } from "./src/stores/progressStore";
 import { computeNextReview } from "./src/utils/srs";
@@ -45,6 +48,13 @@ export default function App() {
     ...FontAwesome5.font,
   });
 
+  const { checkAchievements } = useAchievements();
+  const [showConfetti, setShowConfetti] = React.useState(false);
+
+  React.useEffect(() => {
+    audioService.init();
+  }, []);
+
   const username = useStore(progressStore, s => s.username);
   const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson" | "league" | "profile" | "library">("path");
   const [feedbackStatus, setFeedbackStatus] = React.useState<"idle" | "correct" | "incorrect">("idle");
@@ -58,6 +68,8 @@ export default function App() {
   const [lastFailedRef, setLastFailedRef] = React.useState<string | null>(null);
   // Track the verse reference for the last shown intro to force its first quiz immediately after
   const [lastShownIntroReference, setLastShownIntroReference] = React.useState<string | null>(null);
+  // Track if any mistake was made in the current lesson session to calculate the perfect score bonus
+  const [hasFailedAny, setHasFailedAny] = React.useState(false);
 
   const {
     isLoading,
@@ -138,9 +150,33 @@ export default function App() {
       progressStore.getState().addXp(xpToAward);
       progressStore.getState().updateStreak();
       checkAchievements();
+      
+      // Economy & Gamification
+      progressStore.getState().addCrowns(isReviewMode ? 5 : 10);
+      if (!isReviewMode) {
+        progressStore.getState().updateDailyQuest('studiedNew');
+      }
+      if (!progressStore.getState().xpBoostEndTime) {
+        progressStore.getState().activateXpBoost();
+      }
+      
+      progressStore.getState().syncToCloud();
+
+      if (isReviewMode && !hasFailedAny) {
+        progressStore.getState().showToast("Perfect Review! +10 XP Bonus! 🌟");
+        setShowConfetti(true);
+        audioService.playLessonFinish();
+        setTimeout(() => setShowConfetti(false), 5000);
+      } else if (isReviewMode) {
+        progressStore.getState().showToast("Review Complete! +5 XP Bonus! 📚");
+      } else {
+        progressStore.getState().showToast("Lesson Complete! +5 XP Bonus! 🎉");
+        audioService.playLessonFinish();
+      }
+
       setActiveScreen("path");
     }
-  }, [isLessonComplete, feedbackStatus, isReviewMode]);
+  }, [isLessonComplete, feedbackStatus, isReviewMode, hasFailedAny]);
 
   // Reset all lesson-specific states when exiting the lesson screen
   React.useEffect(() => {
@@ -148,8 +184,41 @@ export default function App() {
       setVerseStepIndex({});
       setLastFailedRef(null);
       setLastShownIntroReference(null);
+      setHasFailedAny(false);
+      
+      // Fetch pending high-fives when returning from a lesson
+      if (username) {
+        progressStore.getState().fetchHighFives();
+      }
     }
   }, [activeScreen]);
+
+  // Fetch high-fives on initial app load
+  React.useEffect(() => {
+    if (username) {
+      progressStore.getState().fetchHighFives();
+    }
+  }, [username]);
+
+  // Display pending high-five toasts sequentially
+  const pendingHighFives = useStore(progressStore, s => s.pendingHighFives);
+  React.useEffect(() => {
+    if (pendingHighFives.length === 0) return;
+    
+    // Show toasts one at a time with a small delay
+    let delay = 0;
+    pendingHighFives.forEach(hf => {
+      setTimeout(() => {
+        progressStore.getState().showToast(`🖐 ${hf.from} sent you a High-Five!`);
+      }, delay);
+      delay += 3500; // 3.5s between toasts (3s display + 0.5s gap)
+    });
+    
+    // Clear after all are scheduled
+    setTimeout(() => {
+      progressStore.getState().clearPendingHighFives();
+    }, delay);
+  }, [pendingHighFives]);
 
   function selectNextQuestion() {
     // Find all unmastered verses (step index <= track length)
@@ -245,11 +314,24 @@ export default function App() {
     }
   }
 
-  const handleAnswerSubmit = (isCorrect: boolean) => {
+  const handleAnswerSubmit = (isCorrect: boolean, hintsUsed?: number) => {
     const currentVerse = verses.find(v => v.verseReference === currentVerseRef);
     if (!currentVerse) return;
 
-    lessonStore.getState().submitAnswer(isCorrect, currentVerseRef);
+    // Scribe hint penalty: if more than half the words were revealed, treat as incorrect
+    let finalCorrect = isCorrect;
+    if (currentMode === "SCRIBE" && hintsUsed && hintsUsed > 0) {
+      const totalWords = (currentVerse.verseText || "").trim().split(/\s+/).length;
+      if (hintsUsed > Math.floor(totalWords / 2)) {
+        finalCorrect = false;
+      }
+    }
+
+    if (!finalCorrect) {
+      setHasFailedAny(true);
+    }
+
+    lessonStore.getState().submitAnswer(finalCorrect, currentVerseRef);
 
     const pState = progressStore.getState();
     const currentRecord = pState.entries.find(e => e.verseReference === currentVerse.verseReference) || {
@@ -259,10 +341,10 @@ export default function App() {
       repetitions: 0
     };
 
-    const nextRecord = computeNextReview(currentRecord, isCorrect);
+    const nextRecord = computeNextReview(currentRecord, finalCorrect);
     pState.addOrUpdate(nextRecord);
 
-    setFeedbackStatus(isCorrect ? "correct" : "incorrect");
+    setFeedbackStatus(finalCorrect ? "correct" : "incorrect");
   };
 
   const handleIntroComplete = () => {
@@ -295,10 +377,20 @@ export default function App() {
       if (currentStep && currentStep.mode === "SCRIBE") {
         progressStore.getState().incrementPerfectScribes();
       }
+
+      const nextStepIndex = stepIndex + 1;
       setVerseStepIndex(prev => ({
         ...prev,
-        [currentVerseRef]: stepIndex + 1,
+        [currentVerseRef]: nextStepIndex,
       }));
+
+      // Micro-Reward & Streak Protection if verse is FULLY MASTERED in this session
+      if (nextStepIndex > track.length) {
+        progressStore.getState().addXp(3); // Micro-XP!
+        progressStore.getState().updateStreak(); // Instant Streak Protection!
+        progressStore.getState().showToast("Verse Mastered! +3 XP! 🌟");
+        progressStore.getState().syncToCloud(); // Sync score to cloud instantly!
+      }
     }
   };
 
@@ -311,6 +403,12 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
+
+      {showConfetti && (
+        <View style={styles.confettiContainer} pointerEvents="none">
+          <ConfettiCannon count={200} origin={{x: -10, y: 0}} />
+        </View>
+      )}
 
       {username === null ? (
         <WelcomeScreen onDismiss={() => setActiveScreen("path")} />
@@ -361,25 +459,49 @@ export default function App() {
                 style={[styles.navTab, activeScreen === "path" && styles.navTabActive]}
                 onPress={() => setActiveScreen("path")}
               >
-                <Text style={[styles.navText, activeScreen === "path" && styles.navTextActive]}>🏠 Path</Text>
+                <FontAwesome5 
+                  name="map-marked-alt" 
+                  size={18} 
+                  color={activeScreen === "path" ? "#4A90D9" : "#888"} 
+                  style={{ marginBottom: 4 }}
+                />
+                <Text style={[styles.navText, activeScreen === "path" && styles.navTextActive]}>Path</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.navTab, activeScreen === "league" && styles.navTabActive]}
                 onPress={() => setActiveScreen("league")}
               >
-                <Text style={[styles.navText, activeScreen === "league" && styles.navTextActive]}>🏆 League</Text>
+                <FontAwesome5 
+                  name="trophy" 
+                  size={18} 
+                  color={activeScreen === "league" ? "#4A90D9" : "#888"} 
+                  style={{ marginBottom: 4 }}
+                />
+                <Text style={[styles.navText, activeScreen === "league" && styles.navTextActive]}>League</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.navTab, activeScreen === "library" && styles.navTabActive]}
                 onPress={() => setActiveScreen("library")}
               >
-                <Text style={[styles.navText, activeScreen === "library" && styles.navTextActive]}>📚 Library</Text>
+                <FontAwesome5 
+                  name="book-open" 
+                  size={18} 
+                  color={activeScreen === "library" ? "#4A90D9" : "#888"} 
+                  style={{ marginBottom: 4 }}
+                />
+                <Text style={[styles.navText, activeScreen === "library" && styles.navTextActive]}>Library</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.navTab, activeScreen === "profile" && styles.navTabActive]}
                 onPress={() => setActiveScreen("profile")}
               >
-                <Text style={[styles.navText, activeScreen === "profile" && styles.navTextActive]}>👤 Profile</Text>
+                <FontAwesome5 
+                  name="user-alt" 
+                  size={18} 
+                  color={activeScreen === "profile" ? "#4A90D9" : "#888"} 
+                  style={{ marginBottom: 4 }}
+                />
+                <Text style={[styles.navText, activeScreen === "profile" && styles.navTextActive]}>Profile</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -403,7 +525,7 @@ interface LessonEngineProps {
   currentMissingCount: number;
   copyrightText: string;
   handleIntroComplete: () => void;
-  handleAnswerSubmit: (isCorrect: boolean) => void;
+  handleAnswerSubmit: (isCorrect: boolean, hintsUsed?: number) => void;
   currentQuestionIndex: number;
   lessonId: string | null;
 }
@@ -594,6 +716,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
   },
+  confettiContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+  },
   bottomNav: {
     flexDirection: "row",
     borderTopWidth: 1,
@@ -604,7 +734,8 @@ const styles = StyleSheet.create({
   navTab: {
     flex: 1,
     alignItems: "center",
-    paddingVertical: 16,
+    justifyContent: "center",
+    paddingVertical: 10,
   },
   navTabActive: {
     borderTopWidth: 3,
@@ -612,7 +743,7 @@ const styles = StyleSheet.create({
     marginTop: -1,
   },
   navText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#888",
     fontWeight: "600",
   },

@@ -11,11 +11,15 @@ const SHEET_HEIGHT = 200;
 
 export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Props) {
   const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
   const isVisible = status !== "idle";
 
   useEffect(() => {
     if (!isVisible) {
       translateY.setValue(SHEET_HEIGHT);
+      floatAnim.setValue(0);
+      opacityAnim.setValue(0);
       return;
     }
 
@@ -26,7 +30,21 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
       tension: 100,
       useNativeDriver: true,
     }).start();
-  }, [isVisible]);
+
+    if (status === "correct") {
+      Animated.parallel([
+        Animated.timing(floatAnim, {
+          toValue: -150, // Float up 150px
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.sequence([
+          Animated.timing(opacityAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+          Animated.timing(opacityAnim, { toValue: 0, duration: 800, useNativeDriver: true })
+        ])
+      ]).start();
+    }
+  }, [isVisible, status]);
 
   if (!isVisible) return null;
 
@@ -46,6 +64,18 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
         <View style={styles.headerRow}>
           <Text style={styles.emoji}>{isCorrect ? "🎉" : "😔"}</Text>
           <Text style={styles.label}>{isCorrect ? "Correct!" : "Incorrect"}</Text>
+          
+          {/* Floating XP Particle */}
+          {isCorrect && (
+            <Animated.Text 
+              style={[
+                styles.floatingXp, 
+                { opacity: opacityAnim, transform: [{ translateY: floatAnim }] }
+              ]}
+            >
+              +10 XP
+            </Animated.Text>
+          )}
         </View>
 
         {!isCorrect && (
@@ -101,6 +131,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     color: "#FFF",
+  },
+  floatingXp: {
+    position: 'absolute',
+    right: 0,
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFD700',
+    textShadowColor: 'rgba(0,0,0,0.2)',
+    textShadowOffset: {width: 1, height: 1},
+    textShadowRadius: 2,
   },
   correctionBox: {
     backgroundColor: "rgba(0,0,0,0.1)",

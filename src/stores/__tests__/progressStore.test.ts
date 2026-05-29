@@ -142,4 +142,42 @@ describe("progressStore", () => {
     // 3. Status must remain 'completed'
     expect(progressStore.getState().lessonSessions["unit-01"].status).toBe("completed");
   });
+
+  test("addHighFiveCrown respects daily cap of 10 crowns and resets next day", () => {
+    const { addHighFiveCrown, reset } = progressStore.getState();
+    reset();
+
+    // Send 10 high fives, all should award a crown
+    for (let i = 0; i < 10; i++) {
+      const result = progressStore.getState().addHighFiveCrown();
+      expect(result).toBe(true);
+    }
+    expect(progressStore.getState().crowns).toBe(10);
+    expect(progressStore.getState().highFiveCrownsToday).toBe(10);
+
+    // 11th high-five should not award a crown
+    const result11 = progressStore.getState().addHighFiveCrown();
+    expect(result11).toBe(false);
+    expect(progressStore.getState().crowns).toBe(10);
+    expect(progressStore.getState().highFiveCrownsToday).toBe(10);
+
+    // Mutate the date to simulate next day (yesterday)
+    progressStore.setState({ lastHighFiveDate: "2020-01-01" });
+
+    // The next high five should reset daily count and succeed
+    const resultNextDay = progressStore.getState().addHighFiveCrown();
+    expect(resultNextDay).toBe(true);
+    expect(progressStore.getState().crowns).toBe(11);
+    expect(progressStore.getState().highFiveCrownsToday).toBe(1);
+  });
+
+  test("clearPendingHighFives resets pending array", () => {
+    progressStore.setState({
+      pendingHighFives: [{ from: "Alice", timestamp: "2026-05-29T00:00:00Z" }]
+    });
+
+    expect(progressStore.getState().pendingHighFives.length).toBe(1);
+    progressStore.getState().clearPendingHighFives();
+    expect(progressStore.getState().pendingHighFives.length).toBe(0);
+  });
 });

@@ -10,6 +10,10 @@ import {
   SafeAreaView
 } from "react-native";
 import { progressStore } from "../stores/progressStore";
+import { Filter } from 'bad-words';
+import { db, isFirebaseConfigured } from '../services/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { FontAwesome5 } from "@expo/vector-icons";
 
 interface WelcomeScreenProps {
   onDismiss: () => void;
@@ -18,8 +22,9 @@ interface WelcomeScreenProps {
 export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
   const [nameInput, setNameInput] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     const trimmed = nameInput.trim();
     if (!trimmed) {
       setError("Please enter a username to start.");
@@ -34,9 +39,42 @@ export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
       return;
     }
 
-    // Save to local progressStore
-    progressStore.getState().setUsername(trimmed);
-    onDismiss();
+    const filter = new Filter();
+    if (filter.isProfane(trimmed)) {
+      setError("Username contains inappropriate language.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isFirebaseConfigured && db) {
+        const userRef = doc(db, 'users', trimmed.toLowerCase());
+        const userDoc = await getDoc(userRef);
+        if (!userDoc.exists()) {
+          await setDoc(userRef, {
+            username: trimmed,
+            usernameLower: trimmed.toLowerCase(),
+            xp: 0,
+            weeklyXp: 0,
+            streakDays: 0,
+            crowns: 0,
+            streakFreezes: 0,
+            nodeSkin: 'default',
+            leagueTier: 'Bronze',
+            lastActive: new Date().toISOString()
+          });
+        }
+      }
+
+      // Save to local progressStore
+      progressStore.getState().setUsername(trimmed);
+      onDismiss();
+    } catch (err) {
+      console.error("Firebase error:", err);
+      setError("Could not connect to the cloud database.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,7 +84,7 @@ export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
         style={styles.container}
       >
         <View style={styles.card}>
-          <Text style={styles.emoji}>🏆</Text>
+          <FontAwesome5 name="trophy" size={48} color="#F5A623" style={{ marginBottom: 16 }} />
           <Text style={styles.title}>Welcome to BibleLingo!</Text>
           <Text style={styles.subtitle}>
             Begin your scripture memorization journey. Choose a username to track your progress and climb the leaderboard!
@@ -70,8 +108,13 @@ export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
 
           {error && <Text style={styles.errorText}>{error}</Text>}
 
-          <TouchableOpacity style={styles.button} onPress={handleStart} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Start Journey</Text>
+          <TouchableOpacity
+            style={[styles.button, isLoading && { opacity: 0.7 }]}
+            onPress={handleStart}
+            activeOpacity={0.8}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>{isLoading ? "Connecting..." : "Start Journey"}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

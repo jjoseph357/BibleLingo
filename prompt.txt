@@ -1,0 +1,6 @@
+Put 2 Timothy 3:16-17 above the Daily quests. When does the "No practice completed yet today" get completed.
+Replace all emojis with FontAwesome icons.
+How are crowns earned? What are the stars? The text XP should explicitly be in the text to clarify the intention of the icon.
+Make the daily practice easier to find as it is a primary feature
+Make the +XP juice linger longer.
+When the user earns a chest, an animation of a chest being opened and dispensing loot should be played.

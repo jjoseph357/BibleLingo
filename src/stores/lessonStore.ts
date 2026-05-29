@@ -13,13 +13,10 @@ import { createStore } from "zustand/vanilla";
 import { VerseItem } from "../types/models";
 import { fetchLessonVerses } from "../services/bibleApi";
 
-const INITIAL_LIVES = 3;
-
 export interface LessonState {
   verses: VerseItem[];
   currentQuestionIndex: number;
   score: number;
-  lives: number;
   isLessonComplete: boolean;
   isLoading: boolean;
   offlineError: string | null;
@@ -40,7 +37,6 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
   verses: [],
   currentQuestionIndex: 0,
   score: 0,
-  lives: INITIAL_LIVES,
   isLessonComplete: false,
   isLoading: false,
   offlineError: null,
@@ -66,7 +62,6 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
         verses: hydrated,
         currentQuestionIndex: 0,
         score: 0,
-        lives: INITIAL_LIVES,
         isLessonComplete: false,
         isLoading: false,
         copyrightText: copyright,
@@ -86,7 +81,6 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
       verses,
       currentQuestionIndex: 0,
       score: 0,
-      lives: INITIAL_LIVES,
       isLessonComplete: false,
       isLoading: false,
       offlineError: null,
@@ -101,11 +95,8 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
 
     if (isCorrect) {
       set({ score: state.score + 1, lastPlayedVerseReference: verseRef });
-    } else if (state.isReviewMode) {
-      set({ lastPlayedVerseReference: verseRef });
     } else {
-      const newLives = state.lives - 1;
-      set({ lives: newLives, lastPlayedVerseReference: verseRef });
+      set({ lastPlayedVerseReference: verseRef });
     }
   },
 
@@ -125,7 +116,6 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
     set({
       currentQuestionIndex: 0,
       score: 0,
-      lives: INITIAL_LIVES,
       isLessonComplete: false,
       offlineError: null,
       lastPlayedVerseReference: null,
@@ -136,7 +126,6 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
       verses: [],
       currentQuestionIndex: 0,
       score: 0,
-      lives: INITIAL_LIVES,
       isLessonComplete: false,
       isLoading: false,
       offlineError: null,

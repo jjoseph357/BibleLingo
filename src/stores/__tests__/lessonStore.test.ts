@@ -46,39 +46,20 @@ describe("lessonStore", () => {
     expect(s.verses).toHaveLength(3);
     expect(s.currentQuestionIndex).toBe(0);
     expect(s.score).toBe(0);
-    expect(s.lives).toBe(3);
     expect(s.isLessonComplete).toBe(false);
   });
 
-  test("submitAnswer(true) increments score without affecting lives", () => {
+  test("submitAnswer(true) increments score", () => {
     lessonStore.getState().submitAnswer(true);
     const s = lessonStore.getState();
     expect(s.score).toBe(1);
-    expect(s.lives).toBe(3);
   });
 
-  test("submitAnswer(false) decrements a life", () => {
+  test("submitAnswer(false) does not affect score", () => {
     lessonStore.getState().submitAnswer(false);
     const s = lessonStore.getState();
-    expect(s.lives).toBe(2);
     expect(s.score).toBe(0);
     expect(s.isLessonComplete).toBe(false);
-  });
-
-  test("reaching 0 lives (or fewer) decrements lives but does not set isLessonComplete to true", () => {
-    const { submitAnswer } = lessonStore.getState();
-    submitAnswer(false); // lives → 2
-    submitAnswer(false); // lives → 1
-    submitAnswer(false); // lives → 0
-
-    const s = lessonStore.getState();
-    expect(s.lives).toBe(0);
-    expect(s.isLessonComplete).toBe(false);
-
-    submitAnswer(false); // lives → -1
-    const s2 = lessonStore.getState();
-    expect(s2.lives).toBe(-1);
-    expect(s2.isLessonComplete).toBe(false);
   });
 
   test("completing all questions sets isLessonComplete to true", () => {
@@ -110,7 +91,7 @@ describe("lessonStore", () => {
     expect(s.currentQuestionIndex).toBe(0);
   });
 
-  test("restartLesson resets score, lives, and index but keeps verses", () => {
+  test("restartLesson resets score and index but keeps verses", () => {
     const { submitAnswer, nextQuestion, restartLesson } =
       lessonStore.getState();
     submitAnswer(true);
@@ -122,7 +103,6 @@ describe("lessonStore", () => {
     const s = lessonStore.getState();
     expect(s.currentQuestionIndex).toBe(0);
     expect(s.score).toBe(0);
-    expect(s.lives).toBe(3);
     expect(s.isLessonComplete).toBe(false);
     expect(s.verses).toHaveLength(3); // verses preserved
   });
@@ -139,7 +119,6 @@ describe("lessonStore", () => {
     const s = lessonStore.getState();
     expect(s.currentQuestionIndex).toBe(0);
     expect(s.score).toBe(0);
-    expect(s.lives).toBe(3);
     expect(s.isLessonComplete).toBe(false);
     expect(s.verses).toHaveLength(0); // verses fully cleared
     expect(s.isReviewMode).toBe(false);
