@@ -143,23 +143,23 @@ describe("progressStore", () => {
     expect(progressStore.getState().lessonSessions["unit-01"].status).toBe("completed");
   });
 
-  test("addHighFiveCrown respects daily cap of 10 crowns and resets next day", () => {
+  test("addHighFiveCrown respects daily cap of 5 crowns and resets next day", () => {
     const { addHighFiveCrown, reset } = progressStore.getState();
     reset();
 
-    // Send 10 high fives, all should award a crown
-    for (let i = 0; i < 10; i++) {
+    // Fill cap for today
+    for (let i = 0; i < 5; i++) {
       const result = progressStore.getState().addHighFiveCrown();
       expect(result).toBe(true);
     }
-    expect(progressStore.getState().crowns).toBe(10);
-    expect(progressStore.getState().highFiveCrownsToday).toBe(10);
+    expect(progressStore.getState().crowns).toBe(5);
+    expect(progressStore.getState().highFiveCrownsToday).toBe(5);
 
     // 11th high-five should not award a crown
     const result11 = progressStore.getState().addHighFiveCrown();
     expect(result11).toBe(false);
-    expect(progressStore.getState().crowns).toBe(10);
-    expect(progressStore.getState().highFiveCrownsToday).toBe(10);
+    expect(progressStore.getState().crowns).toBe(5);
+    expect(progressStore.getState().highFiveCrownsToday).toBe(5);
 
     // Mutate the date to simulate next day (yesterday)
     progressStore.setState({ lastHighFiveDate: "2020-01-01" });
@@ -167,7 +167,7 @@ describe("progressStore", () => {
     // The next high five should reset daily count and succeed
     const resultNextDay = progressStore.getState().addHighFiveCrown();
     expect(resultNextDay).toBe(true);
-    expect(progressStore.getState().crowns).toBe(11);
+    expect(progressStore.getState().crowns).toBe(6);
     expect(progressStore.getState().highFiveCrownsToday).toBe(1);
   });
 

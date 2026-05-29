@@ -242,9 +242,9 @@ export function LeagueScreen() {
       // Award sender +1 crown (capped at 10/day in addHighFiveCrown)
       const awarded = progressStore.getState().addHighFiveCrown();
       if (awarded) {
-        progressStore.getState().showToast(`🖐 You sent a High-Five to ${recipientName}! +1 Crown`);
+        progressStore.getState().showToast(`You sent a High-Five to ${recipientName}! +1 Crown`);
       } else {
-        progressStore.getState().showToast(`🖐 High-Five sent to ${recipientName}! (Daily crown cap reached)`);
+        progressStore.getState().showToast(`High-Five sent to ${recipientName}! (Daily crown cap reached)`);
       }
     } catch (err) {
       console.error("Failed to send high-five:", err);

@@ -15,6 +15,7 @@ import { progressStore } from "../stores/progressStore";
 import { ALL_LESSONS } from "../stores/pathStore";
 import { TopBar } from "./TopBar";
 import { fetchLessonVerses } from "../services/bibleApi";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 // ── Types ───────────────────────────────────────────────────
 
@@ -120,16 +121,24 @@ export function LibraryScreen() {
         <View style={styles.cardHeader}>
           <Text style={styles.reference}>{item.verseReference}</Text>
           <View style={[styles.badge, isMastered && styles.badgeMastered]}>
-            <Text style={[styles.badgeText, isMastered && styles.badgeTextMastered]}>
-              {isMastered ? "★ Mastered" : `${item.stepIndex}/${item.totalSteps} Steps`}
-            </Text>
+            {isMastered ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <FontAwesome5 name="star" size={12} color="#B7791F" style={{ marginRight: 4 }} />
+                <Text style={[styles.badgeText, styles.badgeTextMastered]}>Mastered</Text>
+              </View>
+            ) : (
+              <Text style={styles.badgeText}>{item.stepIndex}/{item.totalSteps} Steps</Text>
+            )}
           </View>
         </View>
         
         <Text style={styles.bookPath}>{item.bookPath}</Text>
         
         <View style={styles.footerRow}>
-          <Text style={styles.themeTag}>🏷️ {item.themeTag}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome5 name="tag" size={12} color="#4A5568" style={{ marginRight: 4 }} />
+            <Text style={styles.themeTag}>{item.themeTag}</Text>
+          </View>
           {/* Visual Mini Progress Bar */}
           <View style={styles.miniBarBg}>
             <View 

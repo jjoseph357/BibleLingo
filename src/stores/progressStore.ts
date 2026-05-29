@@ -18,6 +18,13 @@ function getStartOfWeek(date: Date): string {
   return d.toISOString();
 }
 
+export function getLocalTodayString(date: Date = new Date()): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export interface LessonSession {
   status: "in_progress" | "completed";
   verseStepIndex?: Record<string, number>;
@@ -174,7 +181,7 @@ export const progressStore = createStore<ProgressState>()(
       updateStreak: () => {
         const state = get();
         const now = new Date();
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        const today = getLocalTodayString(now);
         
         let newStreak = state.streakDays;
         let newFreezes = state.streakFreezes;
@@ -350,7 +357,7 @@ export const progressStore = createStore<ProgressState>()(
       }),
 
       buyNodeSkin: (skinId) => set((state) => {
-        const costs: Record<string, number> = { 'obsidian': 100, 'gold': 250 };
+        const costs: Record<string, number> = { 'obsidian': 150, 'gold': 500 };
         const cost = costs[skinId] || 0;
         if (state.crowns >= cost && state.nodeSkin !== skinId) {
           return { crowns: state.crowns - cost, nodeSkin: skinId };
@@ -360,7 +367,7 @@ export const progressStore = createStore<ProgressState>()(
 
       updateDailyQuest: (quest) => set((state) => {
         // Ensure quests are reset if date is mismatched before updating
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalTodayString();
         const quests = state.lastQuestDate === today ? { ...state.dailyQuests } : { ...DEFAULT_QUESTS };
         quests[quest] = true;
         return { dailyQuests: quests, lastQuestDate: today };
@@ -370,7 +377,7 @@ export const progressStore = createStore<ProgressState>()(
         if (!state.dailyQuests.chestClaimed) {
           return { 
             dailyQuests: { ...state.dailyQuests, chestClaimed: true },
-            crowns: state.crowns + 50 
+            crowns: state.crowns + 25 
           };
         }
         return state;
@@ -408,12 +415,12 @@ export const progressStore = createStore<ProgressState>()(
 
       addHighFiveCrown: () => {
         const state = get();
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalTodayString();
         let todayCount = state.highFiveCrownsToday;
         if (state.lastHighFiveDate !== today) {
           todayCount = 0;
         }
-        if (todayCount >= 10) return false; // Daily cap reached
+        if (todayCount >= 5) return false; // Daily cap reached
         set({
           crowns: state.crowns + 1,
           highFiveCrownsToday: todayCount + 1,

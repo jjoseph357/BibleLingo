@@ -31,9 +31,9 @@ describe("generateMasteryTrack", () => {
     expect(track[6].mode).toBe("SCRIBE");
 
     // Rule: missingCount scales up for fill-in steps
-    expect(track[1].missingCount).toBe(1);
-    expect(track[2].missingCount).toBe(2);
-    expect(track[4].missingCount).toBe(2);
+    expect(track[1].missingCount).toBe(2);
+    expect(track[2].missingCount).toBe(3);
+    expect(track[4].missingCount).toBe(4);
   });
 
   test("Medium verse (15 - 30 words) generates exactly 11 steps and follows rules", () => {
@@ -70,11 +70,11 @@ describe("generateMasteryTrack", () => {
     expect(track[9].mode).toBe("NAVIGATOR_HARD");
 
     // Rule: missingCount scales up
-    expect(track[1].missingCount).toBe(1);
-    expect(track[2].missingCount).toBe(2);
-    expect(track[3].missingCount).toBe(3);
-    expect(track[5].missingCount).toBe(3);
-    expect(track[7].missingCount).toBe(4);
+    expect(track[1].missingCount).toBe(3);
+    expect(track[2].missingCount).toBe(4);
+    expect(track[3].missingCount).toBe(5);
+    expect(track[5].missingCount).toBe(6);
+    expect(track[7].missingCount).toBe(8);
   });
 
   test("Long verse (> 30 words) generates exactly 13 steps and follows rules", () => {
@@ -111,12 +111,12 @@ describe("generateMasteryTrack", () => {
     expect(track[11].mode).toBe("NAVIGATOR_HARD");
 
     // Rule: missingCount scales up
-    expect(track[1].missingCount).toBe(1);
-    expect(track[2].missingCount).toBe(2);
-    expect(track[3].missingCount).toBe(3);
-    expect(track[4].missingCount).toBe(4);
-    expect(track[6].missingCount).toBe(4);
-    expect(track[8].missingCount).toBe(5);
-    expect(track[10].missingCount).toBe(6);
+    expect(track[1].missingCount).toBe(4);
+    expect(track[2].missingCount).toBe(6);
+    expect(track[3].missingCount).toBe(8);
+    expect(track[4].missingCount).toBe(10);
+    expect(track[6].missingCount).toBe(8);
+    expect(track[8].missingCount).toBe(10);
+    expect(track[10].missingCount).toBe(12);
   });
 });

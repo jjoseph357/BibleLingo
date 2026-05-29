@@ -37,7 +37,8 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
     <Modal visible={visible} animationType="slide" presentationStyle="formSheet" onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>The Crown Shop 👑</Text>
+          <FontAwesome5 name="crown" size={20} color="#F5A623" style={{ marginRight: 8 }} />
+          <Text style={styles.title}>The Crown Shop</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <FontAwesome5 name="times" size={24} color="#666" />
           </TouchableOpacity>
@@ -66,7 +67,7 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               style={[styles.buyButton, crowns < 50 && styles.buyButtonDisabled]}
               onPress={handleBuyFreeze}
             >
-              <Text style={styles.buyButtonText}>50 👑</Text>
+              <Text style={styles.buyButtonText}>50 Crowns</Text>
             </TouchableOpacity>
           </View>
 
@@ -83,13 +84,13 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               style={[
                 styles.buyButton, 
                 nodeSkin === 'obsidian' && styles.equippedButton,
-                nodeSkin !== 'obsidian' && crowns < 100 && styles.buyButtonDisabled
+                nodeSkin !== 'obsidian' && crowns < 150 && styles.buyButtonDisabled
               ]}
-              onPress={() => handleBuySkin('obsidian', 100)}
+              onPress={() => handleBuySkin('obsidian', 150)}
               disabled={nodeSkin === 'obsidian'}
             >
               <Text style={nodeSkin === 'obsidian' ? styles.equippedText : styles.buyButtonText}>
-                {nodeSkin === 'obsidian' ? 'Equipped' : '100 👑'}
+                {nodeSkin === 'obsidian' ? 'Equipped' : '150 Crowns'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -107,13 +108,13 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               style={[
                 styles.buyButton, 
                 nodeSkin === 'gold' && styles.equippedButton,
-                nodeSkin !== 'gold' && crowns < 250 && styles.buyButtonDisabled
+                nodeSkin !== 'gold' && crowns < 500 && styles.buyButtonDisabled
               ]}
-              onPress={() => handleBuySkin('gold', 250)}
+              onPress={() => handleBuySkin('gold', 500)}
               disabled={nodeSkin === 'gold'}
             >
               <Text style={nodeSkin === 'gold' ? styles.equippedText : styles.buyButtonText}>
-                {nodeSkin === 'gold' ? 'Equipped' : '250 👑'}
+                {nodeSkin === 'gold' ? 'Equipped' : '500 Crowns'}
               </Text>
             </TouchableOpacity>
           </View>

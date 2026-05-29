@@ -152,7 +152,7 @@ export default function App() {
       checkAchievements();
       
       // Economy & Gamification
-      progressStore.getState().addCrowns(isReviewMode ? 5 : 10);
+      progressStore.getState().addCrowns(isReviewMode ? 2 : 5);
       if (!isReviewMode) {
         progressStore.getState().updateDailyQuest('studiedNew');
       }
@@ -163,14 +163,14 @@ export default function App() {
       progressStore.getState().syncToCloud();
 
       if (isReviewMode && !hasFailedAny) {
-        progressStore.getState().showToast("Perfect Review! +10 XP Bonus! 🌟");
+        progressStore.getState().showToast("Perfect Review! +10 XP Bonus!");
         setShowConfetti(true);
         audioService.playLessonFinish();
         setTimeout(() => setShowConfetti(false), 5000);
       } else if (isReviewMode) {
-        progressStore.getState().showToast("Review Complete! +5 XP Bonus! 📚");
+        progressStore.getState().showToast("Review Complete! +5 XP Bonus!");
       } else {
-        progressStore.getState().showToast("Lesson Complete! +5 XP Bonus! 🎉");
+        progressStore.getState().showToast("Lesson Complete! +5 XP Bonus!");
         audioService.playLessonFinish();
       }
 
@@ -209,7 +209,7 @@ export default function App() {
     let delay = 0;
     pendingHighFives.forEach(hf => {
       setTimeout(() => {
-        progressStore.getState().showToast(`🖐 ${hf.from} sent you a High-Five!`);
+        progressStore.getState().showToast(`${hf.from} sent you a High-Five!`);
       }, delay);
       delay += 3500; // 3.5s between toasts (3s display + 0.5s gap)
     });
@@ -388,7 +388,7 @@ export default function App() {
       if (nextStepIndex > track.length) {
         progressStore.getState().addXp(3); // Micro-XP!
         progressStore.getState().updateStreak(); // Instant Streak Protection!
-        progressStore.getState().showToast("Verse Mastered! +3 XP! 🌟");
+        progressStore.getState().showToast("Verse Mastered! +3 XP!");
         progressStore.getState().syncToCloud(); // Sync score to cloud instantly!
       }
     }

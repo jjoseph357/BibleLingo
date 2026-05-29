@@ -58,7 +58,7 @@ export function TopBar() {
       {boostTimeLeft && (
         <View style={[styles.badge, styles.boostBadge]}>
           <FontAwesome5 name="bolt" size={14} color="#FFF" style={styles.iconMargin} />
-          <Text style={styles.boostText}>{boostTimeLeft}</Text>
+          <Text style={styles.boostText}>2x XP: {boostTimeLeft}</Text>
         </View>
       )}
 
@@ -66,7 +66,7 @@ export function TopBar() {
         {/* Talents / XP Indicator */}
         <View style={[styles.badge, { marginRight: 8 }]}>
           <FontAwesome5 name="star" size={16} color="#4A90D9" style={styles.iconMargin} />
-          <Text style={[styles.text, styles.xpText]}>{xp}</Text>
+          <Text style={[styles.text, styles.xpText]}>{xp} XP</Text>
         </View>
 
         {/* Crowns & Shop Button */}

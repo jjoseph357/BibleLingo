@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, StyleSheet, TouchableOpacity, View } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 interface Props {
   status: "idle" | "correct" | "incorrect";
@@ -35,12 +36,13 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
       Animated.parallel([
         Animated.timing(floatAnim, {
           toValue: -150, // Float up 150px
-          duration: 1000,
+          duration: 2500,
           useNativeDriver: true,
         }),
         Animated.sequence([
           Animated.timing(opacityAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-          Animated.timing(opacityAnim, { toValue: 0, duration: 800, useNativeDriver: true })
+          Animated.delay(1200), // Linger at full opacity
+          Animated.timing(opacityAnim, { toValue: 0, duration: 1100, useNativeDriver: true })
         ])
       ]).start();
     }
@@ -62,7 +64,7 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
     >
       <View style={styles.content}>
         <View style={styles.headerRow}>
-          <Text style={styles.emoji}>{isCorrect ? "🎉" : "😔"}</Text>
+          <FontAwesome5 name={isCorrect ? "check-circle" : "times-circle"} size={28} color="#FFF" style={styles.emoji} solid />
           <Text style={styles.label}>{isCorrect ? "Correct!" : "Incorrect"}</Text>
           
           {/* Floating XP Particle */}

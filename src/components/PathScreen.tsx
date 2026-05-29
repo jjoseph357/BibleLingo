@@ -18,6 +18,7 @@ import { progressStore } from "../stores/progressStore";
 import { lessonStore } from "../stores/lessonStore";
 import { TopBar } from "./TopBar";
 import { ProgressBar } from "./animations/ProgressBar";
+import { ChestAnimationModal } from "./animations/ChestAnimationModal";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 // ── Colour map per status ────────────────────────────────────
@@ -69,14 +70,10 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
     return progressEntries.filter(e => e.nextReviewDate <= todayStr && e.intervalDays > 0).length;
   }, [progressEntries]);
 
-  const lastPracticeDate = useStore(progressStore, (s) => s.lastPracticeDate);
-  const hasPracticedToday = useMemo(() => {
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    return lastPracticeDate === today;
-  }, [lastPracticeDate]);
-
   const nodeSkin = useStore(progressStore, (s) => s.nodeSkin) || 'default';
+
+  // Chest animation state
+  const [showChestAnimation, setShowChestAnimation] = React.useState(false);
 
   // Auto-complete Quests
   React.useEffect(() => {
@@ -92,36 +89,72 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
       }
     }
   }, [dueCount]);
- 
-  const StreakHeader = () => (
-    <View style={styles.streakBanner}>
+
+  const QuoteCard = () => (
+    <View style={styles.quoteCard}>
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
         <FontAwesome5 
           name="bible" 
           size={18} 
           color="#F5A623" 
-          style={styles.streakIconMargin} 
+          style={{ marginRight: 8 }} 
         />
-        <Text style={styles.streakTitle}>2 Timothy 3:16-17</Text>
+        <Text style={styles.quoteTitle}>2 Timothy 3:16-17</Text>
       </View>
-      <Text style={styles.verseTextQuote}>
+      <Text style={styles.quoteText}>
         "All Scripture is God-breathed and profitable for teaching, for reproof, for correction, for instruction in righteousness, that the man of God may be complete, fully equipped for every good work."
       </Text>
-      <View style={styles.practiceStatusRow}>
-        <FontAwesome5 
-          name={hasPracticedToday ? "check-circle" : "circle"} 
-          size={14} 
-          color={hasPracticedToday ? "#2E7D32" : "#A0A0A0"} 
-          style={{ marginRight: 6 }} 
-        />
-        <Text style={[styles.practiceStatusText, hasPracticedToday ? styles.practicedActive : styles.practicedInactive]}>
-          {hasPracticedToday
-            ? "Completed today's practice!"
-            : "No practice completed yet today."}
-        </Text>
-      </View>
     </View>
   );
+
+  const DailyPracticeCard = () => {
+    if (dueCount > 0) {
+      return (
+        <TouchableOpacity
+          style={styles.practiceCard}
+          activeOpacity={0.85}
+          onPress={() => {
+            if (!onStartReview) return;
+            const todayStr = new Date().toISOString();
+            const dueRefs = new Set(
+              progressEntries
+                .filter(e => e.nextReviewDate <= todayStr && e.intervalDays > 0)
+                .map(e => e.verseReference)
+            );
+            const dueVerses = ALL_LESSONS.filter(l => dueRefs.has(l.verseReference));
+            lessonStore.getState().loadLesson(dueVerses, true);
+            onStartReview();
+          }}
+        >
+          <View style={styles.practiceCardHeader}>
+            <View style={styles.practiceIconCircle}>
+              <FontAwesome5 name="book-reader" size={22} color="#FFF" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 14 }}>
+              <Text style={styles.practiceCardTitle}>Daily Practice</Text>
+              <Text style={styles.practiceCardSubtitle}>
+                {dueCount} {dueCount === 1 ? 'verse' : 'verses'} due for review
+              </Text>
+            </View>
+            <View style={styles.practiceStartBadge}>
+              <FontAwesome5 name="play" size={12} color="#FFF" style={{ marginRight: 6 }} />
+              <Text style={styles.practiceStartText}>Start</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <View style={styles.practiceCardDone}>
+        <FontAwesome5 name="check-circle" size={20} color="#2E7D32" style={{ marginRight: 10 }} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.practiceCardDoneTitle}>All Caught Up!</Text>
+          <Text style={styles.practiceCardDoneSubtitle}>Your practice queue is clear. Keep up the excellent work!</Text>
+        </View>
+      </View>
+    );
+  };
 
   const DailyQuestsCard = () => {
     const { dailyQuests } = useStore(progressStore);
@@ -155,7 +188,7 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
             onPress={() => {
               if (!dailyQuests.chestClaimed) {
                 claimDailyChest();
-                Alert.alert("Chest Claimed!", "You earned 50 Crowns! 👑");
+                setShowChestAnimation(true);
               }
             }}
             disabled={dailyQuests.chestClaimed}
@@ -172,8 +205,9 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
 
   const Header = () => (
     <View>
+      <QuoteCard />
+      <DailyPracticeCard />
       <DailyQuestsCard />
-      <StreakHeader />
     </View>
   );
 
@@ -267,7 +301,7 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
         activeOpacity={0.8}
         onPress={() => {
           if (dueCount === 0) {
-            Alert.alert("All Caught Up!", "You have no verses due for review. Great job! 🎉");
+            Alert.alert("All Caught Up!", "You have no verses due for review. Great job!");
             return;
           }
           if (!onStartReview) return;
@@ -291,6 +325,11 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
           </View>
         )}
       </TouchableOpacity>
+
+      <ChestAnimationModal
+        visible={showChestAnimation}
+        onClose={() => setShowChestAnimation(false)}
+      />
     </View>
   );
 }
@@ -352,7 +391,7 @@ const styles = StyleSheet.create({
   lockedText: {
     color: "#999",
   },
-  streakBanner: {
+  quoteCard: {
     flexDirection: "column",
     alignItems: "stretch",
     backgroundColor: "#FFF8E7",
@@ -362,37 +401,84 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#FFE0B2",
   },
-  streakIconMargin: {
-    marginRight: 8,
-  },
-  streakTitle: {
+  quoteTitle: {
     fontSize: 16,
     fontWeight: "800",
     color: "#D4891A",
   },
-  verseTextQuote: {
+  quoteText: {
     fontSize: 14,
     lineHeight: 20,
     color: "#5C5C5C",
     fontStyle: "italic",
-    marginBottom: 12,
   },
-  practiceStatusRow: {
+  practiceCard: {
+    backgroundColor: "#4A90D9",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#4A90D9",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  practiceCardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#FFE0B2",
-    paddingTop: 8,
   },
-  practiceStatusText: {
-    fontSize: 12,
+  practiceIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  practiceCardTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#FFF",
+  },
+  practiceCardSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.85)",
+    marginTop: 2,
+    fontWeight: "500",
+  },
+  practiceStartBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.25)",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  practiceStartText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#FFF",
+  },
+  practiceCardDone: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E8F5E9",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#C8E6C9",
+  },
+  practiceCardDoneTitle: {
+    fontSize: 16,
     fontWeight: "700",
-  },
-  practicedActive: {
     color: "#2E7D32",
   },
-  practicedInactive: {
-    color: "#888",
+  practiceCardDoneSubtitle: {
+    fontSize: 13,
+    color: "#4CAF50",
+    marginTop: 2,
+    fontWeight: "500",
   },
   fab: {
     position: "absolute",

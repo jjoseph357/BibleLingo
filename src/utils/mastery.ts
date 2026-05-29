@@ -31,42 +31,42 @@ export function generateMasteryTrack(verseText: string): MasteryStep[] {
     // SHORT (< 15 words): 7 steps
     return [
       { mode: "NAVIGATOR_EASY", missingCount: 0 },
-      { mode: "MISSING_LINK", missingCount: 1 },
       { mode: "MISSING_LINK", missingCount: 2 },
+      { mode: "MISSING_LINK", missingCount: 3 },
       { mode: "NAVIGATOR_HARD", missingCount: 0 },
-      { mode: "TYPE_BLANK", missingCount: 2 },
+      { mode: "TYPE_BLANK", missingCount: 4 },
       { mode: "SCRAMBLE", missingCount: 0 },
       { mode: "SCRIBE", missingCount: 0 },
     ];
   } else if (wordCount <= 30) {
-    // MEDIUM (15 - 30 words): 10 steps
+    // MEDIUM (15 - 30 words): 11 steps
     return [
       { mode: "NAVIGATOR_EASY", missingCount: 0 },
-      { mode: "MISSING_LINK", missingCount: 1 },
-      { mode: "MISSING_LINK", missingCount: 2 },
       { mode: "MISSING_LINK", missingCount: 3 },
+      { mode: "MISSING_LINK", missingCount: 4 },
+      { mode: "MISSING_LINK", missingCount: 5 },
       { mode: "NAVIGATOR_HARD", missingCount: 0 },
-      { mode: "TYPE_BLANK", missingCount: 3 },
+      { mode: "TYPE_BLANK", missingCount: 6 },
       { mode: "SCRAMBLE", missingCount: 0 },
-      { mode: "TYPE_BLANK", missingCount: 4 },
+      { mode: "TYPE_BLANK", missingCount: 8 },
       { mode: "SCRAMBLE", missingCount: 0 },
       { mode: "NAVIGATOR_HARD", missingCount: 0 },
       { mode: "SCRIBE", missingCount: 0 },
     ];
   } else {
-    // LONG (> 30 words): 12 steps
+    // LONG (> 30 words): 13 steps
     return [
       { mode: "NAVIGATOR_EASY", missingCount: 0 },
-      { mode: "MISSING_LINK", missingCount: 1 },
-      { mode: "MISSING_LINK", missingCount: 2 },
-      { mode: "MISSING_LINK", missingCount: 3 },
       { mode: "MISSING_LINK", missingCount: 4 },
+      { mode: "MISSING_LINK", missingCount: 6 },
+      { mode: "MISSING_LINK", missingCount: 8 },
+      { mode: "MISSING_LINK", missingCount: 10 },
       { mode: "NAVIGATOR_HARD", missingCount: 0 },
-      { mode: "TYPE_BLANK", missingCount: 4 },
+      { mode: "TYPE_BLANK", missingCount: 8 },
       { mode: "SCRAMBLE", missingCount: 0 },
-      { mode: "TYPE_BLANK", missingCount: 5 },
+      { mode: "TYPE_BLANK", missingCount: 10 },
       { mode: "SCRAMBLE", missingCount: 0 },
-      { mode: "TYPE_BLANK", missingCount: 6 },
+      { mode: "TYPE_BLANK", missingCount: 12 },
       { mode: "NAVIGATOR_HARD", missingCount: 0 },
       { mode: "SCRIBE", missingCount: 0 },
     ];
