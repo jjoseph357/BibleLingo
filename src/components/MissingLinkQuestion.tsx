@@ -64,58 +64,60 @@ export function MissingLinkQuestion({
 
   return (
     <View style={styles.container}>
-      <View style={styles.sentenceBox}>
-        {chunks.map((chunk, index) => {
-          const blankSlotIndex = blankIndices.indexOf(index);
-          const isBlank = blankSlotIndex !== -1;
+      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.scrollArea} keyboardShouldPersistTaps="handled">
+        <View style={styles.sentenceBox}>
+          {chunks.map((chunk, index) => {
+            const blankSlotIndex = blankIndices.indexOf(index);
+            const isBlank = blankSlotIndex !== -1;
 
-          if (isBlank) {
-            const filledWord = filledBlanks[blankSlotIndex];
+            if (isBlank) {
+              const filledWord = filledBlanks[blankSlotIndex];
+              return (
+                <TouchableOpacity
+                  key={`blank-${index}`}
+                  style={[styles.blankSlot, filledWord && styles.filledSlot]}
+                  onPress={() => filledWord && tapFilledBlank(filledWord, blankSlotIndex)}
+                  activeOpacity={filledWord ? 0.7 : 1}
+                >
+                  <Text style={[styles.blankText, filledWord && styles.filledText]}>
+                    {filledWord ? filledWord.text : "___"}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }
+
             return (
-              <TouchableOpacity
-                key={`blank-${index}`}
-                style={[styles.blankSlot, filledWord && styles.filledSlot]}
-                onPress={() => filledWord && tapFilledBlank(filledWord, blankSlotIndex)}
-                activeOpacity={filledWord ? 0.7 : 1}
-              >
-                <Text style={[styles.blankText, filledWord && styles.filledText]}>
-                  {filledWord ? filledWord.text : "___"}
-                </Text>
-              </TouchableOpacity>
+              <Text key={`text-${index}`} style={styles.staticText}>
+                {chunk}{" "}
+              </Text>
             );
-          }
-
-          return (
-            <Text key={`text-${index}`} style={styles.staticText}>
-              {chunk}{" "}
-            </Text>
-          );
-        })}
-      </View>
-
-      {onSubmit && (
-        <TouchableOpacity
-          style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitDisabled}
-        >
-          <Text style={styles.submitText}>Check</Text>
-        </TouchableOpacity>
-      )}
-
-      <View style={styles.wordBank}>
-        <Text style={styles.label}>Word Bank</Text>
-        <View style={styles.wordRow}>
-          {bankWords.map((word) => (
-            <AnimatedWordChip
-              key={word.id}
-              text={word.text}
-              onPress={() => tapBankWord(word)}
-              chipStyle={styles.bankChip}
-            />
-          ))}
+          })}
         </View>
-      </View>
+
+        {onSubmit && (
+          <TouchableOpacity
+            style={[styles.submitButton, isSubmitDisabled && styles.submitButtonDisabled]}
+            onPress={handleSubmit}
+            disabled={isSubmitDisabled}
+          >
+            <Text style={styles.submitText}>Check</Text>
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.wordBank}>
+          <Text style={styles.label}>Word Bank</Text>
+          <View style={styles.wordRow}>
+            {bankWords.map((word) => (
+              <AnimatedWordChip
+                key={word.id}
+                text={word.text}
+                onPress={() => tapBankWord(word)}
+                chipStyle={styles.bankChip}
+              />
+            ))}
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -124,6 +126,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    justifyContent: "space-between",
+  },
+  scrollArea: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: "space-between",
   },
   sentenceBox: {

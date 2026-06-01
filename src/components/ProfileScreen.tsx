@@ -1,16 +1,74 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useStore } from "zustand";
 import { progressStore } from "../stores/progressStore";
-import { ALL_ACHIEVEMENTS } from "../utils/achievementEngine";
+import { ALL_ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES, checkAchievements } from "../utils/achievementEngine";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { auth } from "../services/firebase";
+import { signOut } from "firebase/auth";
 
 export function ProfileScreen() {
-  const { xp, streakDays, achievements, perfectScribes, username } = useStore(progressStore);
+  const state = useStore(progressStore);
+  const { xp, streakDays, achievements, perfectScribes, username, uid } = state;
+
+  useEffect(() => {
+    // Auto-heal: Ensure any achievements earned (e.g., via Shop, Dev Tools, etc.)
+    // that missed the post-lesson check get awarded when viewing the profile!
+    checkAchievements();
+  }, [state]);
+
+  const getAchievementProgress = (achievementId: string) => {
+    for (const cat of ACHIEVEMENT_CATEGORIES) {
+      const tier = cat.tiers.find(t => t.id === achievementId);
+      if (tier) {
+        return { value: cat.getValue(state), requirement: tier.requirement };
+      }
+    }
+    return { value: 0, requirement: 1 };
+  };
+
+  const sortedAchievements = [...ALL_ACHIEVEMENTS].sort((a, b) => {
+    const aUnlocked = achievements.includes(a.id);
+    const bUnlocked = achievements.includes(b.id);
+    if (aUnlocked && !bUnlocked) return -1;
+    if (!aUnlocked && bUnlocked) return 1;
+    return 0;
+  });
+
+  const handleSignOut = async () => {
+    if (auth) {
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.error("Firebase signOut error:", e);
+      }
+    }
+    progressStore.getState().reset();
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.headerTitle}>{username ? `${username}'s Profile` : "Your Profile"}</Text>
+      {/* Header Title & Sign Out Button */}
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
+          {username ? `${username}` : "Profile"}
+        </Text>
+        <TouchableOpacity 
+          style={styles.headerSignOutButton} 
+          onPress={handleSignOut}
+          activeOpacity={0.8}
+        >
+          <FontAwesome5 
+            name={uid === "offline-user" ? "sign-out-alt" : "power-off"} 
+            size={12} 
+            color="#E53935" 
+            style={{ marginRight: 6 }}
+          />
+          <Text style={styles.headerSignOutButtonText}>
+            {uid === "offline-user" ? "Exit Offline" : "Log Out"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Stats Section */}
       <View style={styles.statsRow}>
@@ -20,7 +78,7 @@ export function ProfileScreen() {
           <Text style={styles.statLabel}>Day Streak</Text>
         </View>
         <View style={styles.statBox}>
-          <FontAwesome5 name="coins" size={28} color="#F5A623" />
+          <FontAwesome5 name="star" size={28} color="#F5A623" />
           <Text style={styles.statValue}>{xp}</Text>
           <Text style={styles.statLabel}>Total XP</Text>
         </View>
@@ -34,8 +92,11 @@ export function ProfileScreen() {
       {/* Achievements Section */}
       <Text style={styles.sectionTitle}>Achievements</Text>
       <View style={styles.achievementsList}>
-        {ALL_ACHIEVEMENTS.map((achievement) => {
+        {sortedAchievements.map((achievement) => {
           const isUnlocked = achievements.includes(achievement.id);
+          const prog = getAchievementProgress(achievement.id);
+          const progressRatio = Math.min(prog.value / prog.requirement, 1);
+          
           return (
             <View 
               key={achievement.id} 
@@ -44,12 +105,17 @@ export function ProfileScreen() {
                 !isUnlocked && styles.achievementLocked
               ]}
             >
-              <View style={[styles.iconWrapper, isUnlocked ? styles.iconUnlocked : styles.iconLocked]}>
-                <FontAwesome5 
-                  name={isUnlocked ? "medal" : "lock"} 
-                  size={24} 
-                  color={isUnlocked ? "#FFF" : "#999"} 
-                />
+              <View style={[styles.iconWrapper, isUnlocked && styles.iconUnlocked]}>
+                {isUnlocked ? (
+                  <FontAwesome5 name="medal" size={24} color="#FFF" />
+                ) : (
+                  <View style={styles.progressCircleBg}>
+                    <View style={[styles.progressCircleFill, { height: `${progressRatio * 100}%` }]} />
+                    <View style={styles.progressCircleOverlay}>
+                      <FontAwesome5 name="lock" size={16} color="#A0AEC0" />
+                    </View>
+                  </View>
+                )}
               </View>
               <View style={styles.achievementText}>
                 <Text style={[styles.achievementTitle, !isUnlocked && styles.textLocked]}>
@@ -58,6 +124,11 @@ export function ProfileScreen() {
                 <Text style={styles.achievementDesc}>
                   {achievement.description}
                 </Text>
+                {!isUnlocked && (
+                  <Text style={styles.progressLabel}>
+                    Progress: {prog.value} / {prog.requirement}
+                  </Text>
+                )}
               </View>
             </View>
           );
@@ -76,12 +147,19 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 24,
+  },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "800",
     color: "#333",
-    marginBottom: 20,
-    marginTop: 10,
+    flex: 1,
+    marginRight: 12,
   },
   statsRow: {
     flexDirection: "row",
@@ -169,5 +247,44 @@ const styles = StyleSheet.create({
   achievementDesc: {
     fontSize: 14,
     color: "#666",
+  },
+  progressCircleBg: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#EDF2F7",
+    overflow: "hidden",
+    justifyContent: "flex-end",
+  },
+  progressCircleFill: {
+    width: "100%",
+    backgroundColor: "#90CDF4",
+  },
+  progressCircleOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#A0AEC0",
+    marginTop: 6,
+  },
+  headerSignOutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFEBEE",
+    borderWidth: 1,
+    borderColor: "#FFCDD2",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  headerSignOutButtonText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#E53935",
   },
 });

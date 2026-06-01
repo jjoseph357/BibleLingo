@@ -12,11 +12,12 @@ import becl from "../data/lessons/basic-elements-of-the-christian-life.json";
 import eol from "../data/lessons/experience-of-life.json";
 import lsr from "../data/lessons/life-study-of-romans.json";
 
-export const ALL_LESSONS = [...eog1, ...becl, ...eol, ...lsr] as VerseItem[];
+export const ALL_LESSONS = [...becl, ...eog1, ...eol, ...lsr] as VerseItem[];
 
 export interface GroupedUnit extends Omit<UnitNode, "id"> {
   id: string; // unique string for SectionList key
   lessons: VerseItem[];
+  chapterTitle?: string;
 }
 
 export interface BookSection {
@@ -46,11 +47,6 @@ export function getGroupedLessons(): BookSection[] {
   const { isAllUnlocked } = pathStore.getState();
   const progressEntries = progressStore.getState().entries;
 
-  // A verse is "completed" if they've answered it correctly at least once (interval > 0)
-  const completedVerseRefs = new Set(
-    progressEntries.filter((e) => e.intervalDays > 0).map((e) => e.verseReference)
-  );
-
   // 1. Group lessons by bookPath -> unitTitle
   const booksMap = new Map<string, Map<string, VerseItem[]>>();
 
@@ -76,7 +72,6 @@ export function getGroupedLessons(): BookSection[] {
     for (const [unitTitle, lessons] of unitsMap.entries()) {
       const unitId = `${bookPath}-${unitTitle}`;
       const isUnitCompleted =
-        lessons.every((l) => completedVerseRefs.has(l.verseReference)) ||
         progressStore.getState().lessonSessions[unitId]?.status === "completed";
 
       let status: UnitStatus = "locked";
@@ -103,6 +98,7 @@ export function getGroupedLessons(): BookSection[] {
         bookPath,
         status,
         lessons,
+        chapterTitle: lessons[0]?.chapterTitle,
       });
     }
 

@@ -6,7 +6,8 @@
             "baseUrl": "/BibleLingo"
         },
         "web": {
-            "bundler": "metro"
+            "bundler": "metro",
+            "favicon": "./assets/icons8-bible-100 (1).png"
         }
     }
 }

@@ -25,6 +25,48 @@ export const ALL_ACHIEVEMENTS = [
   // 5. Redeeming the Time
   { id: "redeeming_the_time_1", title: "Redeeming the Time I", description: "Practiced early in the morning 1 time." },
   { id: "redeeming_the_time_2", title: "Redeeming the Time II", description: "Practiced early in the morning 5 times." },
+  // 6. The Crown Collector
+  { id: "crown_collector_1", title: "The Crown Collector I", description: "Accumulate a total of 100 lifetime Crowns." },
+  { id: "crown_collector_2", title: "The Crown Collector II", description: "Accumulate a total of 500 lifetime Crowns." },
+  { id: "crown_collector_3", title: "The Crown Collector III", description: "Accumulate a total of 1,000 lifetime Crowns." },
+
+  // 7. A New Raiment
+  { id: "new_raiment_1", title: "A New Raiment", description: "Purchase your first Node Skin in the Crown Shop." },
+
+  // 8. Prepared Virgin
+  { id: "prepared_virgin_1", title: "Prepared Virgin", description: "Purchase a Streak Freeze." },
+
+  // 9. Building Up the Body
+  { id: "building_body_1", title: "Building Up the Body I", description: "High-five your leaderboard companions 5 times." },
+  { id: "building_body_2", title: "Building Up the Body II", description: "High-five your leaderboard companions 25 times." },
+  { id: "building_body_3", title: "Building Up the Body III", description: "High-five your leaderboard companions 100 times." },
+
+  // 10. Ascending Mount Zion
+  { id: "ascending_zion_1", title: "Ascending Mount Zion I", description: "Get promoted to Silver League." },
+  { id: "ascending_zion_2", title: "Ascending Mount Zion II", description: "Get promoted to Gold League." },
+  { id: "ascending_zion_3", title: "Ascending Mount Zion III", description: "Get promoted to Platinum League." },
+  { id: "ascending_zion_4", title: "Ascending Mount Zion IV", description: "Get promoted to Diamond League." },
+  { id: "ascending_zion_5", title: "Ascending Mount Zion V", description: "Get promoted to Master League." },
+
+  // 11. Devoted Disciple
+  { id: "devoted_disciple_1", title: "Devoted Disciple I", description: "Complete all three daily quests 1 time." },
+  { id: "devoted_disciple_2", title: "Devoted Disciple II", description: "Complete all three daily quests 10 times." },
+  { id: "devoted_disciple_3", title: "Devoted Disciple III", description: "Complete all three daily quests 50 times." },
+
+  // 12. Double Portion
+  { id: "double_portion_1", title: "Double Portion", description: "Complete a lesson while a 15-Minute Double XP Boost is active." },
+
+  // 13. Vigilant Sentinel
+  { id: "vigilant_sentinel_1", title: "Vigilant Sentinel", description: "Completely clear your Daily Practice queue." },
+
+  // 14. Deeply Rooted
+  { id: "deeply_rooted_1", title: "Deeply Rooted I", description: "Raise a verse to Box 4 (Interval >= 15)." },
+  { id: "deeply_rooted_2", title: "Deeply Rooted II", description: "Raise a verse to Box 5 (Interval >= 30)." },
+
+  // 15. The Whole Counsel
+  { id: "whole_counsel_1", title: "The Whole Counsel I", description: "Memorize verses across 3 different books." },
+  { id: "whole_counsel_2", title: "The Whole Counsel II", description: "Memorize verses across 5 different books." },
+  { id: "whole_counsel_3", title: "The Whole Counsel III", description: "Memorize verses across 10 different books." },
 ];
 
 interface Tier {
@@ -39,7 +81,28 @@ interface AchievementCategory {
   tiers: Tier[];
 }
 
-const ACHIEVEMENT_CATEGORIES: AchievementCategory[] = [
+const getBookCount = (state: any) => {
+  const books = new Set<string>();
+  state.entries.forEach((e: any) => {
+    if (e.intervalDays > 0) { // Only count if actually learned
+      const match = e.verseReference.match(/^(\d?\s*[a-zA-Z]+)/);
+      if (match) books.add(match[1].trim());
+    }
+  });
+  return books.size;
+};
+
+const getLeagueValue = (tier: string) => {
+  switch (tier) {
+    case 'Silver': return 1;
+    case 'Gold': return 2;
+    case 'Platinum': return 3;
+    case 'Diamond': return 4;
+    default: return 0;
+  }
+};
+
+export const ACHIEVEMENT_CATEGORIES: AchievementCategory[] = [
   {
     category: "good_land_explorer",
     getValue: (state) => state.entries.filter((e: any) => e.intervalDays > 0).length,
@@ -83,6 +146,88 @@ const ACHIEVEMENT_CATEGORIES: AchievementCategory[] = [
     tiers: [
       { id: "redeeming_the_time_1", title: "Redeeming the Time I", requirement: 1 },
       { id: "redeeming_the_time_2", title: "Redeeming the Time II", requirement: 5 },
+    ]
+  },
+  {
+    category: "crown_collector",
+    getValue: (state) => state.lifetimeCrowns,
+    tiers: [
+      { id: "crown_collector_1", title: "The Crown Collector I", requirement: 100 },
+      { id: "crown_collector_2", title: "The Crown Collector II", requirement: 500 },
+      { id: "crown_collector_3", title: "The Crown Collector III", requirement: 1000 },
+    ]
+  },
+  {
+    category: "new_raiment",
+    getValue: (state) => state.nodeSkin !== 'default' ? 1 : 0,
+    tiers: [
+      { id: "new_raiment_1", title: "A New Raiment", requirement: 1 },
+    ]
+  },
+  {
+    category: "prepared_virgin",
+    getValue: (state) => state.hasBoughtStreakFreeze ? 1 : 0,
+    tiers: [
+      { id: "prepared_virgin_1", title: "Prepared Virgin", requirement: 1 },
+    ]
+  },
+  {
+    category: "building_body",
+    getValue: (state) => state.highFivesSent,
+    tiers: [
+      { id: "building_body_1", title: "Building Up the Body I", requirement: 5 },
+      { id: "building_body_2", title: "Building Up the Body II", requirement: 25 },
+      { id: "building_body_3", title: "Building Up the Body III", requirement: 100 },
+    ]
+  },
+  {
+    category: "ascending_zion",
+    getValue: (state) => getLeagueValue(state.leagueTier),
+    tiers: [
+      { id: "ascending_zion_1", title: "Ascending Mount Zion I", requirement: 1 },
+      { id: "ascending_zion_2", title: "Ascending Mount Zion II", requirement: 2 },
+      { id: "ascending_zion_3", title: "Ascending Mount Zion III", requirement: 3 },
+      { id: "ascending_zion_4", title: "Ascending Mount Zion IV", requirement: 4 },
+    ]
+  },
+  {
+    category: "devoted_disciple",
+    getValue: (state) => state.devotedDiscipleCount,
+    tiers: [
+      { id: "devoted_disciple_1", title: "Devoted Disciple I", requirement: 1 },
+      { id: "devoted_disciple_2", title: "Devoted Disciple II", requirement: 10 },
+      { id: "devoted_disciple_3", title: "Devoted Disciple III", requirement: 50 },
+    ]
+  },
+  {
+    category: "double_portion",
+    getValue: (state) => state.doublePortionLessonsCompleted,
+    tiers: [
+      { id: "double_portion_1", title: "Double Portion", requirement: 1 },
+    ]
+  },
+  {
+    category: "vigilant_sentinel",
+    getValue: (state) => state.vigilantSentinelCount,
+    tiers: [
+      { id: "vigilant_sentinel_1", title: "Vigilant Sentinel", requirement: 1 },
+    ]
+  },
+  {
+    category: "deeply_rooted",
+    getValue: (state) => Math.max(0, ...state.entries.map((e: any) => e.intervalDays)),
+    tiers: [
+      { id: "deeply_rooted_1", title: "Deeply Rooted I", requirement: 15 },
+      { id: "deeply_rooted_2", title: "Deeply Rooted II", requirement: 30 },
+    ]
+  },
+  {
+    category: "whole_counsel",
+    getValue: (state) => getBookCount(state),
+    tiers: [
+      { id: "whole_counsel_1", title: "The Whole Counsel I", requirement: 3 },
+      { id: "whole_counsel_2", title: "The Whole Counsel II", requirement: 5 },
+      { id: "whole_counsel_3", title: "The Whole Counsel III", requirement: 10 },
     ]
   }
 ];

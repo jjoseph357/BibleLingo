@@ -13,6 +13,7 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
   const crowns = useStore(progressStore, s => s.crowns);
   const streakFreezes = useStore(progressStore, s => s.streakFreezes);
   const nodeSkin = useStore(progressStore, s => s.nodeSkin);
+  const ownedSkins = useStore(progressStore, s => s.ownedSkins) || ['default'];
   const buyStreakFreeze = useStore(progressStore, s => s.buyStreakFreeze);
   const buyNodeSkin = useStore(progressStore, s => s.buyNodeSkin);
 
@@ -71,6 +72,29 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
             </TouchableOpacity>
           </View>
 
+          {/* Classic Skin */}
+          <View style={styles.itemCard}>
+            <View style={[styles.itemIconContainer, { backgroundColor: '#E0E0E0' }]}>
+              <FontAwesome5 name="circle" size={32} color="#666" />
+            </View>
+            <View style={styles.itemInfo}>
+              <Text style={styles.itemName}>Classic Node Skin</Text>
+              <Text style={styles.itemDesc}>The standard learning path nodes.</Text>
+            </View>
+            <TouchableOpacity 
+              style={[
+                styles.buyButton, 
+                nodeSkin === 'default' && styles.equippedButton
+              ]}
+              onPress={() => buyNodeSkin('default')}
+              disabled={nodeSkin === 'default'}
+            >
+              <Text style={nodeSkin === 'default' ? styles.equippedText : styles.buyButtonText}>
+                {nodeSkin === 'default' ? 'Equipped' : 'Equip'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Obsidian Skin */}
           <View style={styles.itemCard}>
             <View style={[styles.itemIconContainer, { backgroundColor: '#333' }]}>
@@ -84,13 +108,13 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               style={[
                 styles.buyButton, 
                 nodeSkin === 'obsidian' && styles.equippedButton,
-                nodeSkin !== 'obsidian' && crowns < 150 && styles.buyButtonDisabled
+                nodeSkin !== 'obsidian' && !ownedSkins.includes('obsidian') && crowns < 150 && styles.buyButtonDisabled
               ]}
               onPress={() => handleBuySkin('obsidian', 150)}
               disabled={nodeSkin === 'obsidian'}
             >
               <Text style={nodeSkin === 'obsidian' ? styles.equippedText : styles.buyButtonText}>
-                {nodeSkin === 'obsidian' ? 'Equipped' : '150 Crowns'}
+                {nodeSkin === 'obsidian' ? 'Equipped' : (ownedSkins.includes('obsidian') ? 'Equip' : '150 Crowns')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -108,13 +132,13 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               style={[
                 styles.buyButton, 
                 nodeSkin === 'gold' && styles.equippedButton,
-                nodeSkin !== 'gold' && crowns < 500 && styles.buyButtonDisabled
+                nodeSkin !== 'gold' && !ownedSkins.includes('gold') && crowns < 500 && styles.buyButtonDisabled
               ]}
               onPress={() => handleBuySkin('gold', 500)}
               disabled={nodeSkin === 'gold'}
             >
               <Text style={nodeSkin === 'gold' ? styles.equippedText : styles.buyButtonText}>
-                {nodeSkin === 'gold' ? 'Equipped' : '500 Crowns'}
+                {nodeSkin === 'gold' ? 'Equipped' : (ownedSkins.includes('gold') ? 'Equip' : '500 Crowns')}
               </Text>
             </TouchableOpacity>
           </View>

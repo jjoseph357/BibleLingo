@@ -26,6 +26,8 @@ import { lessonStore } from "../stores/lessonStore";
 import { progressStore } from "../stores/progressStore";
 import { pathStore } from "../stores/pathStore";
 
+const TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master'];
+
 // ── Gate: never render in production ─────────────────────────
 
 declare const __DEV__: boolean;
@@ -38,12 +40,70 @@ export function DevMenu() {
   // ── Actions ──────────────────────────────────────────────
 
   const forceWin = () => {
-    const { verses } = lessonStore.getState();
+    const { verses, lessonId, isReviewMode } = lessonStore.getState();
     lessonStore.setState({
       score: verses.length,
       isLessonComplete: true,
     });
+    if (lessonId && !isReviewMode) {
+      progressStore.getState().completeLessonSession(lessonId);
+    }
     Alert.alert("Dev", `Lesson force-won (score: ${verses.length}/${verses.length}).`);
+  };
+
+  const testPromotion = () => {
+    const currentTier = progressStore.getState().leagueTier || 'Bronze';
+    const currentIndex = TIERS.indexOf(currentTier);
+    const nextIndex = Math.min(currentIndex + 1, TIERS.length - 1);
+    const nextTier = TIERS[nextIndex];
+    progressStore.setState({
+      leagueTier: nextTier,
+      pendingPromotion: { from: currentTier, to: nextTier, status: 'promoted' }
+    });
+  };
+
+  const testDemotion = () => {
+    const currentTier = progressStore.getState().leagueTier || 'Bronze';
+    const currentIndex = TIERS.indexOf(currentTier);
+    const prevIndex = Math.max(currentIndex - 1, 0);
+    const prevTier = TIERS[prevIndex];
+    progressStore.setState({
+      leagueTier: prevTier,
+      pendingPromotion: { from: currentTier, to: prevTier, status: 'demoted' }
+    });
+  };
+
+  const setXp = () => {
+    progressStore.setState({ weeklyXp: 1500 });
+    progressStore.getState().addXp(1500);
+    Alert.alert("Dev", "Added 1500 Weekly/Total XP.");
+  };
+
+  const addDevCrowns = () => {
+    progressStore.getState().addCrowns(500);
+    Alert.alert("Dev", "Added 500 Crowns.");
+  };
+
+  const testStreakFreeze = () => {
+    const pStore = progressStore.getState();
+    const streak = Math.max(pStore.streakDays, 5); // Give them at least 5 days so a break is visible
+    
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const twoDaysAgo = `${yyyy}-${mm}-${dd}`;
+    
+    progressStore.setState({ 
+      streakDays: streak,
+      lastPracticeDate: twoDaysAgo 
+    });
+    
+    Alert.alert(
+      "Streak Testing Mode", 
+      `Streak set to ${streak} and last practice set to ${twoDaysAgo} (2 days ago).\n\n1. Check the shop to ensure you own a Streak Freeze.\n2. Complete a lesson to see it consumed and your streak saved!`
+    );
   };
 
   const unlockAll = () => {
@@ -108,16 +168,39 @@ export function DevMenu() {
               <Text style={styles.btnText}>🔓 Unlock All Path Nodes</Text>
             </TouchableOpacity>
 
-            {/* Fast Forward */}
-            <Text style={styles.sectionLabel}>Fast Forward SRS</Text>
+            <Text style={styles.sectionLabel}>League Testing</Text>
             <View style={styles.row}>
-              {[1, 3, 7].map((d) => (
+              <TouchableOpacity style={styles.ffBtn} onPress={testPromotion}>
+                <Text style={styles.ffBtnText}>Promote Rank</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.ffBtn} onPress={testDemotion}>
+                <Text style={styles.ffBtnText}>Demote Rank</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.btn} onPress={setXp}>
+              <Text style={styles.btnText}>⭐ Add 1500 XP</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.sectionLabel}>Gamification</Text>
+            <View style={styles.row}>
+              <TouchableOpacity style={styles.ffBtn} onPress={testStreakFreeze}>
+                <Text style={styles.ffBtnText}>❄️ Test Freeze</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.ffBtn} onPress={addDevCrowns}>
+                <Text style={styles.ffBtnText}>👑 +500 Crowns</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Fast Forward */}
+            <Text style={styles.sectionLabel}>Time Travel SRS (Shift Due Date)</Text>
+            <View style={styles.row}>
+              {[-3, -1, 1, 3, 7].map((d) => (
                 <TouchableOpacity
                   key={d}
                   style={styles.ffBtn}
                   onPress={() => fastForward(d)}
                 >
-                  <Text style={styles.ffBtnText}>+{d}d</Text>
+                  <Text style={styles.ffBtnText}>{d > 0 ? '+' : ''}{d}d</Text>
                 </TouchableOpacity>
               ))}
             </View>

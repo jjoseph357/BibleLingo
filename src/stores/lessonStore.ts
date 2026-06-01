@@ -22,10 +22,11 @@ export interface LessonState {
   offlineError: string | null;
   copyrightText: string;
   isReviewMode: boolean;
+  isCustomPath: boolean;
   lessonId: string | null;
   lastPlayedVerseReference: string | null;
 
-  loadLesson: (verses: VerseItem[], isReview?: boolean, lessonId?: string | null) => Promise<void>;
+  loadLesson: (verses: VerseItem[], isReview?: boolean, lessonId?: string | null, isCustomPath?: boolean) => Promise<void>;
   startLesson: (verses: VerseItem[]) => void;
   submitAnswer: (isCorrect: boolean, verseRef?: string | null) => void;
   nextQuestion: () => void;
@@ -42,11 +43,12 @@ export const lessonStore = createStore<LessonState>((set, get) => ({
   offlineError: null,
   copyrightText: "",
   isReviewMode: false,
+  isCustomPath: false,
   lessonId: null,
   lastPlayedVerseReference: null,
 
-  loadLesson: async (verses, isReview = false, lessonId = null) => {
-    set({ isLoading: true, offlineError: null, copyrightText: "", isReviewMode: isReview, lessonId });
+  loadLesson: async (verses, isReview = false, lessonId = null, isCustomPath = false) => {
+    set({ isLoading: true, offlineError: null, copyrightText: "", isReviewMode: isReview, isCustomPath, lessonId });
 
     try {
       const refs = verses.map((v) => v.verseReference);

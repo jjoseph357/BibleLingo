@@ -15,6 +15,7 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
+  Platform,
 } from "react-native";
 
 interface Props {
@@ -32,7 +33,7 @@ export function AnimatedWordChip({ text, onPress, chipStyle, textStyle }: Props)
       toValue: 1,
       friction: 6,
       tension: 200,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, []);
 

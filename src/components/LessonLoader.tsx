@@ -3,7 +3,7 @@
 // ============================================================
 
 import React, { useEffect, useRef } from "react";
-import { View, Text, Animated, StyleSheet } from "react-native";
+import { View, Text, Animated, StyleSheet, Platform } from "react-native";
 
 export function LessonLoader() {
   const opacity = useRef(new Animated.Value(0.3)).current;
@@ -14,12 +14,12 @@ export function LessonLoader() {
         Animated.timing(opacity, {
           toValue: 1,
           duration: 600,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(opacity, {
           toValue: 0.3,
           duration: 600,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ])
     );

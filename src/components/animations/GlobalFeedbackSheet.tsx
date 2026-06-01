@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Text, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Animated, Text, StyleSheet, TouchableOpacity, View, Platform } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 interface Props {
@@ -13,6 +13,7 @@ const SHEET_HEIGHT = 200;
 export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Props) {
   const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.4)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const isVisible = status !== "idle";
 
@@ -20,6 +21,7 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
     if (!isVisible) {
       translateY.setValue(SHEET_HEIGHT);
       floatAnim.setValue(0);
+      scaleAnim.setValue(0.4);
       opacityAnim.setValue(0);
       return;
     }
@@ -29,20 +31,26 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
       toValue: 0,
       friction: 7,
       tension: 100,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
 
     if (status === "correct") {
       Animated.parallel([
         Animated.timing(floatAnim, {
-          toValue: -150, // Float up 150px
-          duration: 2500,
-          useNativeDriver: true,
+          toValue: -320, // Float high up to the center of the screen
+          duration: 2200,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1.0,
+          friction: 4,
+          tension: 50,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.sequence([
-          Animated.timing(opacityAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-          Animated.delay(1200), // Linger at full opacity
-          Animated.timing(opacityAnim, { toValue: 0, duration: 1100, useNativeDriver: true })
+          Animated.timing(opacityAnim, { toValue: 1, duration: 150, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.delay(1000), // Linger in the middle of the screen
+          Animated.timing(opacityAnim, { toValue: 0, duration: 1000, useNativeDriver: Platform.OS !== 'web' })
         ])
       ]).start();
     }
@@ -66,17 +74,24 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
         <View style={styles.headerRow}>
           <FontAwesome5 name={isCorrect ? "check-circle" : "times-circle"} size={28} color="#FFF" style={styles.emoji} solid />
           <Text style={styles.label}>{isCorrect ? "Correct!" : "Incorrect"}</Text>
-          
-          {/* Floating XP Particle */}
+
+          {/* Centered Floating XP Particle */}
           {isCorrect && (
-            <Animated.Text 
+            <Animated.View
               style={[
-                styles.floatingXp, 
-                { opacity: opacityAnim, transform: [{ translateY: floatAnim }] }
+                styles.floatingXpContainer,
+                {
+                  opacity: opacityAnim,
+                  transform: [
+                    { translateY: floatAnim },
+                    { scale: scaleAnim }
+                  ]
+                }
               ]}
             >
-              +10 XP
-            </Animated.Text>
+              <FontAwesome5 name="star" size={26} color="#FFD93D" solid style={{ marginRight: 8, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 1, height: 2 }, textShadowRadius: 4 }} />
+              <Text style={styles.floatingXpText}>+10 XP</Text>
+            </Animated.View>
           )}
         </View>
 
@@ -134,15 +149,21 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#FFF",
   },
-  floatingXp: {
+  floatingXpContainer: {
     position: 'absolute',
+    left: 0,
     right: 0,
-    fontSize: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  floatingXpText: {
+    fontSize: 38,
     fontWeight: '900',
-    color: '#FFD700',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: {width: 1, height: 1},
-    textShadowRadius: 2,
+    color: '#FFD93D',
+    textShadowColor: 'rgba(0,0,0,0.4)',
+    textShadowOffset: { width: 2, height: 4 },
+    textShadowRadius: 8,
   },
   correctionBox: {
     backgroundColor: "rgba(0,0,0,0.1)",

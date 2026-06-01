@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, View, Text, StyleSheet, TouchableOpacity, Modal, Easing } from "react-native";
+import { Animated, View, Text, StyleSheet, TouchableOpacity, Modal, Easing, Platform } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { audioService } from "../../services/AudioService";
 
 interface Props {
   visible: boolean;
@@ -38,16 +39,16 @@ export function ChestAnimationModal({ visible, onClose }: Props) {
       toValue: 1,
       friction: 5,
       tension: 80,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
 
     const shakeSequence = Animated.loop(
       Animated.sequence([
-        Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 0, duration: 40, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 40, useNativeDriver: Platform.OS !== 'web' }),
         Animated.delay(200),
       ]),
       { iterations: 3 }
@@ -56,6 +57,9 @@ export function ChestAnimationModal({ visible, onClose }: Props) {
     shakeSequence.start(() => {
       // Phase 2: Light burst + open
       setPhase("open");
+      
+      // Play crown sound effect
+      audioService.playCrown();
 
       Animated.parallel([
         // Flare scales up
@@ -63,7 +67,7 @@ export function ChestAnimationModal({ visible, onClose }: Props) {
           toValue: 1,
           duration: 600,
           easing: Easing.out(Easing.exp),
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         // Flare rotates
         Animated.loop(
@@ -71,7 +75,7 @@ export function ChestAnimationModal({ visible, onClose }: Props) {
             toValue: 1,
             duration: 4000,
             easing: Easing.linear,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           })
         ),
       ]).start();
@@ -83,16 +87,16 @@ export function ChestAnimationModal({ visible, onClose }: Props) {
         Animated.parallel([
           // Crown floats upward
           Animated.timing(lootFloat, {
-            toValue: -80,
+            toValue: -120,
             duration: 1200,
             easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           // Crown fades in
           Animated.timing(lootOpacity, {
             toValue: 1,
             duration: 400,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           // Reward text bounces in
           Animated.spring(textScale, {
@@ -100,14 +104,14 @@ export function ChestAnimationModal({ visible, onClose }: Props) {
             friction: 4,
             tension: 60,
             delay: 600,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           // Button fades in
           Animated.timing(buttonOpacity, {
             toValue: 1,
             duration: 400,
             delay: 1200,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
         ]).start(() => {
           setPhase("done");
@@ -150,36 +154,39 @@ export function ChestAnimationModal({ visible, onClose }: Props) {
           ))}
         </Animated.View>
 
-        {/* Chest Icon */}
-        <Animated.View
-          style={{
-            transform: [
-              { translateX: shakeAnim },
-              { scale: scaleAnim },
-            ],
-          }}
-        >
-          <View style={styles.chestCircle}>
-            <FontAwesome5
-              name={phase === "shake" ? "box" : "box-open"}
-              size={64}
-              color={phase === "shake" ? "#F5A623" : "#FFD700"}
-            />
-          </View>
-        </Animated.View>
+        {/* Chest and Floating Loot */}
+        <View style={styles.chestWrapper}>
+          {/* Chest Icon */}
+          <Animated.View
+            style={{
+              transform: [
+                { translateX: shakeAnim },
+                { scale: scaleAnim },
+              ],
+            }}
+          >
+            <View style={styles.chestCircle}>
+              <FontAwesome5
+                name={phase === "shake" ? "box" : "box-open"}
+                size={64}
+                color={phase === "shake" ? "#F5A623" : "#FFD700"}
+              />
+            </View>
+          </Animated.View>
 
-        {/* Floating Loot Crown */}
-        <Animated.View
-          style={[
-            styles.lootContainer,
-            {
-              transform: [{ translateY: lootFloat }],
-              opacity: lootOpacity,
-            },
-          ]}
-        >
-          <FontAwesome5 name="crown" size={40} color="#FFD700" />
-        </Animated.View>
+          {/* Floating Loot Crown */}
+          <Animated.View
+            style={[
+              styles.lootContainer,
+              {
+                transform: [{ translateY: lootFloat }],
+                opacity: lootOpacity,
+              },
+            ]}
+          >
+            <FontAwesome5 name="crown" size={40} color="#FFD700" />
+          </Animated.View>
+        </View>
 
         {/* Reward Text */}
         <Animated.View
@@ -235,9 +242,16 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "rgba(245, 166, 35, 0.3)",
   },
+  chestWrapper: {
+    position: "relative",
+    width: 140,
+    height: 140,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   lootContainer: {
     position: "absolute",
-    top: "42%",
+    alignSelf: "center",
   },
   rewardTitle: {
     fontSize: 24,

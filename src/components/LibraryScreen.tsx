@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from "react-native";
 import { useStore } from "zustand";
 import { progressStore } from "../stores/progressStore";
@@ -20,55 +21,101 @@ import { FontAwesome5 } from "@expo/vector-icons";
 // ── Types ───────────────────────────────────────────────────
 
 interface LibraryVerse {
-  lessonId: string;
   bookPath: string;
   verseReference: string;
-  themeTag: string;
+  allTags: string[];
+  unitLabels: string[];
   stepIndex: number;
   totalSteps: number;
   masteryPercentage: number;
+  strengthDays: number;
 }
 
 // ── Hook: Data Aggregation ───────────────────────────────────
 
 function useLibraryVerses(): LibraryVerse[] {
   const lessonSessions = useStore(progressStore, (s) => s.lessonSessions);
+  const progressEntries = useStore(progressStore, (s) => s.entries);
 
   return useMemo(() => {
-    const list: LibraryVerse[] = [];
+    const deDuped = new Map<string, LibraryVerse>();
+    const entriesMap = new Map(progressEntries.map(e => [e.verseReference, e]));
 
-    // Iterate through all static lessons
-    for (const lesson of ALL_LESSONS) {
-      const session = lessonSessions[lesson.id];
-      if (!session || !session.verseStepIndex) continue;
+    // Iterate through all flat verse items in ALL_LESSONS
+    for (const verseItem of ALL_LESSONS) {
+      const srsEntry = entriesMap.get(verseItem.verseReference);
+      const unitId = `${verseItem.bookPath}-${verseItem.unitTitle}`;
+      const session = lessonSessions[unitId];
+      
+      let stepIndex = session?.verseStepIndex?.[verseItem.verseReference] ?? 0;
+      const isUnitCompleted = session?.status === "completed";
 
-      // Iterate through the lesson's verses
-      for (const verse of lesson.verses) {
-        const stepIndex = session.verseStepIndex[verse.verseReference] ?? 0;
+      // Only include started verses (either has srs entry or stepIndex > 0)
+      if (srsEntry || stepIndex > 0 || isUnitCompleted) {
+        const totalSteps = verseItem.difficulty === "Easy" ? 7 : verseItem.difficulty === "Medium" ? 11 : 13;
         
-        // Only include started verses
-        if (stepIndex > 0) {
-          const trackLength = verse.masteryTrack?.length || 1;
-          // Step index could theoretically exceed track length if completed
-          const clampedStep = Math.min(stepIndex, trackLength);
+        if (isUnitCompleted) {
+          stepIndex = totalSteps;
+        }
+
+        const clampedStep = Math.min(stepIndex, totalSteps);
+        const masteryPercentage = clampedStep / totalSteps;
+        const strengthDays = srsEntry ? srsEntry.intervalDays : 0;
+        
+        const unitLabel = verseItem.unitTitle || verseItem.lessonId;
+        const tags = verseItem.themeTags || [];
+
+        if (deDuped.has(verseItem.verseReference)) {
+          const existing = deDuped.get(verseItem.verseReference)!;
           
-          list.push({
-            lessonId: lesson.id,
-            bookPath: lesson.bookPath || "",
-            verseReference: verse.verseReference,
-            themeTag: verse.themeTags?.[0] || "General",
+          // Append unique unitLabels
+          if (!existing.unitLabels.includes(unitLabel)) {
+            existing.unitLabels.push(unitLabel);
+          }
+          
+          // Append unique tags
+          tags.forEach(t => {
+            if (!existing.allTags.includes(t)) {
+              existing.allTags.push(t);
+            }
+          });
+          
+          // Keep the best mastery progress
+          if (clampedStep > existing.stepIndex) {
+            existing.stepIndex = clampedStep;
+            existing.totalSteps = totalSteps;
+            existing.masteryPercentage = masteryPercentage;
+          }
+          
+          // Keep the highest memory strength
+          if (strengthDays > existing.strengthDays) {
+            existing.strengthDays = strengthDays;
+          }
+        } else {
+          deDuped.set(verseItem.verseReference, {
+            bookPath: verseItem.bookPath,
+            verseReference: verseItem.verseReference,
+            unitLabels: [unitLabel],
+            allTags: [...tags],
             stepIndex: clampedStep,
-            totalSteps: trackLength,
-            masteryPercentage: clampedStep / trackLength,
+            totalSteps: totalSteps,
+            masteryPercentage: masteryPercentage,
+            strengthDays: strengthDays,
           });
         }
       }
     }
 
-    // Sort by most recently learned (or by mastery percentage)
-    // For now, sorting descending by percentage so fully mastered are at the top
-    return list.sort((a, b) => b.masteryPercentage - a.masteryPercentage);
-  }, [lessonSessions]);
+    const list = Array.from(deDuped.values());
+
+    // Sort descending: highest memory strength first, then by mastery percentage
+    return list.sort((a, b) => {
+      if (b.strengthDays !== a.strengthDays) {
+        return b.strengthDays - a.strengthDays;
+      }
+      return b.masteryPercentage - a.masteryPercentage;
+    });
+  }, [lessonSessions, progressEntries]);
 }
 
 // ── Component ────────────────────────────────────────────────
@@ -132,19 +179,32 @@ export function LibraryScreen() {
           </View>
         </View>
         
-        <Text style={styles.bookPath}>{item.bookPath}</Text>
+        <Text style={styles.bookPath} numberOfLines={1} ellipsizeMode="tail">
+          {item.bookPath} • {item.unitLabels[0]}
+          {item.unitLabels.length > 1 ? ` (+${item.unitLabels.length - 1})` : ''}
+        </Text>
         
         <View style={styles.footerRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <FontAwesome5 name="tag" size={12} color="#4A5568" style={{ marginRight: 4 }} />
-            <Text style={styles.themeTag}>{item.themeTag}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'nowrap', flex: 1, overflow: 'hidden' }}>
+            <FontAwesome5 name="tag" size={11} color="#4A5568" style={{ marginRight: 4 }} />
+            <Text style={styles.themeTag} numberOfLines={1} ellipsizeMode="tail">
+              {item.allTags.length > 0 ? item.allTags.slice(0, 2).join(", ") : "General"}
+              {item.allTags.length > 2 ? ` (+${item.allTags.length - 2})` : ''}
+            </Text>
+            
+            {item.strengthDays > 0 && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
+                <FontAwesome5 name="brain" size={11} color="#FF9500" style={{ marginRight: 4 }} />
+                <Text style={styles.strengthText}>Strength: {item.strengthDays}d</Text>
+              </View>
+            )}
           </View>
           {/* Visual Mini Progress Bar */}
           <View style={styles.miniBarBg}>
             <View 
               style={[
                 styles.miniBarFill, 
-                { width: `${Math.min(item.masteryPercentage * 100, 100)}%` },
+                 { width: `${Math.min(item.masteryPercentage * 100, 100)}%` },
                 isMastered && { backgroundColor: "#F5A623" }
               ]} 
             />
@@ -196,15 +256,27 @@ export function LibraryScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.modalBody}>
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               {isLoading ? (
                 <ActivityIndicator size="large" color="#4A90D9" style={{ marginVertical: 40 }} />
               ) : error ? (
                 <Text style={styles.errorText}>{error}</Text>
               ) : (
-                <Text style={styles.modalVerseText}>"{verseText}"</Text>
+                <>
+                  <Text style={styles.modalVerseText}>"{verseText}"</Text>
+                  
+                  {selectedVerse && (
+                    <View style={styles.modalMetadataContainer}>
+                      <Text style={styles.modalMetaLabel}>Collections</Text>
+                      <Text style={styles.modalMetaValue}>{selectedVerse.unitLabels.join(", ")}</Text>
+                      
+                      <Text style={[styles.modalMetaLabel, { marginTop: 16 }]}>Tags</Text>
+                      <Text style={styles.modalMetaValue}>{selectedVerse.allTags.join(", ") || "General"}</Text>
+                    </View>
+                  )}
+                </>
               )}
-            </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -299,6 +371,11 @@ const styles = StyleSheet.create({
     color: "#4A5568",
     fontWeight: "600",
   },
+  strengthText: {
+    fontSize: 13,
+    color: "#D4891A",
+    fontWeight: "700",
+  },
   miniBarBg: {
     width: 60,
     height: 6,
@@ -377,5 +454,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#E53E3E",
     textAlign: "center",
+  },
+  modalMetadataContainer: {
+    marginTop: 32,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: "#EDF2F7",
+  },
+  modalMetaLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#A0AEC0",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  modalMetaValue: {
+    fontSize: 16,
+    color: "#4A5568",
+    lineHeight: 24,
   },
 });

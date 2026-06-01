@@ -9,6 +9,7 @@ export interface VerseItem {
   lessonId: string;
   bookPath: string;           // e.g. "The Economy of God"
   unitTitle: string;          // e.g. "The Triune God"
+  chapterTitle?: string;      // e.g. "CHAPTER ONE: THE MYSTERY OF HUMAN LIFE"
   verseReference: string;     // e.g. "2 Cor. 13:14"
   verseText?: string;         // Populated in-memory from LSM API (not stored locally)
   themeTags: string[];        // e.g. ["Triune God", "Dispensing"]

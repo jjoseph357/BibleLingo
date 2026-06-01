@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useStore } from "zustand";
-import { progressStore } from "../stores/progressStore";
+import { progressStore, getLocalTodayString } from "../stores/progressStore";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 import { ShopModal } from "./ShopModal";
@@ -11,11 +11,9 @@ export function TopBar() {
   const [isShopVisible, setIsShopVisible] = React.useState(false);
   const [boostTimeLeft, setBoostTimeLeft] = React.useState<string | null>(null);
 
-  // Check if streak is active today
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  
-  const isStreakActiveToday = lastPracticeDate === today && streakDays > 0;
+  // Check if streak is active today (timezone/clock-skew robust check)
+  const today = getLocalTodayString();
+  const isStreakActiveToday = lastPracticeDate && lastPracticeDate >= today && streakDays > 0;
 
   // XP Boost Countdown Timer
   React.useEffect(() => {

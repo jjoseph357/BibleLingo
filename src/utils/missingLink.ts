@@ -30,9 +30,11 @@ export function buildMissingLinkState(
     bankWords.push({ id: `t-${index}`, text: chunks[index] });
   });
 
-  decoyWords.forEach((text, i) => {
-    bankWords.push({ id: `d-${i}`, text });
-  });
+  if (decoyWords && Array.isArray(decoyWords)) {
+    decoyWords.forEach((text, i) => {
+      bankWords.push({ id: `d-${i}`, text });
+    });
+  }
 
   return {
     chunks,

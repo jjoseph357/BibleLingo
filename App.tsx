@@ -4,6 +4,7 @@ import { PathScreen } from "./src/components/PathScreen";
 import { DevMenu } from "./src/components/DevMenu";
 import { WelcomeScreen } from "./src/components/WelcomeScreen";
 import { LibraryScreen } from "./src/components/LibraryScreen";
+import { CustomPathsScreen } from "./src/components/CustomPathsScreen";
 
 import { useStore } from "zustand";
 import { lessonStore } from "./src/stores/lessonStore";
@@ -11,7 +12,8 @@ import { LessonLoader } from "./src/components/LessonLoader";
 import { OfflineError } from "./src/components/OfflineError";
 import { ScrambleQuestion } from "./src/components/ScrambleQuestion";
 import { CopyrightFooter } from "./src/components/CopyrightFooter";
-import { TouchableOpacity, Text, View, KeyboardAvoidingView, Platform, AppState } from "react-native";
+import { customPathStore } from "./src/stores/customPathStore";
+import { TouchableOpacity, Text, View, KeyboardAvoidingView, Platform, AppState, Animated } from "react-native";
 import { useAchievements } from "./src/hooks/useAchievements";
 import { useFonts } from "expo-font";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -19,6 +21,9 @@ import { audioService } from "./src/services/AudioService";
 import ConfettiCannon from "react-native-confetti-cannon";
 
 import { progressStore } from "./src/stores/progressStore";
+import { auth, db } from "./src/services/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { computeNextReview } from "./src/utils/srs";
 import { MissingLinkQuestion } from "./src/components/MissingLinkQuestion";
 import { ScribeQuestion } from "./src/components/ScribeQuestion";
@@ -55,8 +60,60 @@ export default function App() {
     audioService.init();
   }, []);
 
+  const uid = useStore(progressStore, s => s.uid);
   const username = useStore(progressStore, s => s.username);
-  const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson" | "league" | "profile" | "library">("path");
+  const [activeScreen, setActiveScreen] = React.useState<"path" | "lesson" | "league" | "profile" | "library" | "customPaths">("path");
+
+  React.useEffect(() => {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const state = progressStore.getState();
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            const progressDoc = await getDoc(doc(db, 'users', user.uid, 'data', 'progress'));
+            const restoreData: any = {
+              uid: user.uid,
+              username: data.username || "Player",
+              xp: data.xp || 0,
+              weeklyXp: data.weeklyXp || 0,
+              streakDays: data.streakDays || 0,
+              crowns: data.crowns || 0,
+              streakFreezes: data.streakFreezes || 0,
+              nodeSkin: data.nodeSkin || 'default',
+              leagueTier: data.leagueTier || 'Bronze',
+            };
+            if (progressDoc.exists()) {
+              const pData = progressDoc.data();
+              if (pData.entries) restoreData.entries = pData.entries;
+              if (pData.lessonSessions) restoreData.lessonSessions = pData.lessonSessions;
+              if (pData.completedLessons) restoreData.completedLessons = pData.completedLessons;
+              if (pData.achievements) restoreData.achievements = pData.achievements;
+              if (pData.lastPracticeDate !== undefined) restoreData.lastPracticeDate = pData.lastPracticeDate;
+              if (pData.lastQuestDate !== undefined) restoreData.lastQuestDate = pData.lastQuestDate;
+              if (pData.dailyQuests !== undefined) restoreData.dailyQuests = pData.dailyQuests;
+              if (pData.lastHighFiveDate !== undefined) restoreData.lastHighFiveDate = pData.lastHighFiveDate;
+              if (pData.highFiveCrownsToday !== undefined) restoreData.highFiveCrownsToday = pData.highFiveCrownsToday;
+              if (pData.earlyMorningsCount !== undefined) restoreData.earlyMorningsCount = pData.earlyMorningsCount;
+              if (pData.perfectScribes !== undefined) restoreData.perfectScribes = pData.perfectScribes;
+            }
+            progressStore.getState().restoreFromCloud(restoreData);
+            progressStore.getState().evaluateDailyResets();
+          } else {
+            progressStore.getState().setUid(user.uid);
+            progressStore.getState().evaluateDailyResets();
+          }
+          // Fetch custom paths from the cloud on login
+          customPathStore.getState().loadPaths();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    });
+    return unsubscribe;
+  }, []);
   const [feedbackStatus, setFeedbackStatus] = React.useState<"idle" | "correct" | "incorrect">("idle");
 
   // Mastery step index tracking per verse (keyed by verseReference)
@@ -80,7 +137,8 @@ export default function App() {
     isLessonComplete,
     isReviewMode,
     lessonId,
-    lastPlayedVerseReference
+    lastPlayedVerseReference,
+    isCustomPath
   } = useStore(lessonStore);
 
   const verses = React.useMemo(() => {
@@ -146,15 +204,34 @@ export default function App() {
   // Return to path if lesson finishes
   React.useEffect(() => {
     if (isLessonComplete && feedbackStatus === "idle") {
-      const xpToAward = isReviewMode ? 5 : 10;
+      const isManualReview = isReviewMode && lessonId !== null;
+      
+      const xpToAward = (isManualReview || isCustomPath) ? 0 : (isReviewMode ? 5 : 10);
       progressStore.getState().addXp(xpToAward);
       progressStore.getState().updateStreak();
       checkAchievements();
       
       // Economy & Gamification
-      progressStore.getState().addCrowns(isReviewMode ? 2 : 5);
+      const crownsToAward = (isManualReview || isCustomPath) ? 0 : (isReviewMode ? 2 : 5);
+      progressStore.getState().addCrowns(crownsToAward);
       if (!isReviewMode) {
         progressStore.getState().updateDailyQuest('studiedNew');
+        
+        // Initialize SRS entries with a 1-day interval so they show up in Daily Practice tomorrow
+        const pState = progressStore.getState();
+        for (const verse of verses) {
+          const existing = pState.entries.find(e => e.verseReference === verse.verseReference);
+          if (!existing) {
+            const nextDate = new Date();
+            nextDate.setDate(nextDate.getDate() + 1); // due in 1 day
+            pState.addOrUpdate({
+              verseReference: verse.verseReference,
+              intervalDays: 1, // Start Leitner box 1 (1 day)
+              nextReviewDate: nextDate.toISOString(),
+              repetitions: 1,
+            });
+          }
+        }
       }
       if (!progressStore.getState().xpBoostEndTime) {
         progressStore.getState().activateXpBoost();
@@ -162,7 +239,11 @@ export default function App() {
       
       progressStore.getState().syncToCloud();
 
-      if (isReviewMode && !hasFailedAny) {
+      if (isCustomPath) {
+        progressStore.getState().showToast("Custom Path Complete!");
+      } else if (isManualReview) {
+        progressStore.getState().showToast("Review Complete! (Study Mode - 0 XP)");
+      } else if (isReviewMode && !hasFailedAny) {
         progressStore.getState().showToast("Perfect Review! +10 XP Bonus!");
         setShowConfetti(true);
         audioService.playLessonFinish();
@@ -176,7 +257,7 @@ export default function App() {
 
       setActiveScreen("path");
     }
-  }, [isLessonComplete, feedbackStatus, isReviewMode, hasFailedAny]);
+  }, [isLessonComplete, feedbackStatus, isReviewMode, hasFailedAny, lessonId]);
 
   // Reset all lesson-specific states when exiting the lesson screen
   React.useEffect(() => {
@@ -186,28 +267,46 @@ export default function App() {
       setLastShownIntroReference(null);
       setHasFailedAny(false);
       
-      // Fetch pending high-fives when returning from a lesson
       if (username) {
+        // Sync any accumulated XP or mastery state to the cloud that wasn't synced yet
+        progressStore.getState().syncToCloud();
+        // Fetch pending high-fives when returning from a lesson
         progressStore.getState().fetchHighFives();
       }
     }
   }, [activeScreen]);
 
-  // Fetch high-fives on initial app load
+  // Fetch and poll for high-fives periodically (every 20 seconds) across all screens
   React.useEffect(() => {
-    if (username) {
+    if (!username) return;
+
+    // Fetch immediately
+    progressStore.getState().fetchHighFives();
+
+    const interval = setInterval(() => {
       progressStore.getState().fetchHighFives();
-    }
+    }, 20000);
+
+    return () => clearInterval(interval);
   }, [username]);
 
-  // Display pending high-five toasts sequentially
+  // Display pending high-five toasts sequentially (de-duplicated by sender to prevent spam)
   const pendingHighFives = useStore(progressStore, s => s.pendingHighFives);
   React.useEffect(() => {
     if (pendingHighFives.length === 0) return;
     
+    // Filter to only unique senders in this batch
+    const uniqueSenders = new Map<string, typeof pendingHighFives[0]>();
+    pendingHighFives.forEach(hf => {
+      if (!uniqueSenders.has(hf.from)) {
+        uniqueSenders.set(hf.from, hf);
+      }
+    });
+    const uniqueList = Array.from(uniqueSenders.values());
+    
     // Show toasts one at a time with a small delay
     let delay = 0;
-    pendingHighFives.forEach(hf => {
+    uniqueList.forEach(hf => {
       setTimeout(() => {
         progressStore.getState().showToast(`${hf.from} sent you a High-Five!`);
       }, delay);
@@ -324,6 +423,9 @@ export default function App() {
       const totalWords = (currentVerse.verseText || "").trim().split(/\s+/).length;
       if (hintsUsed > Math.floor(totalWords / 2)) {
         finalCorrect = false;
+      } else if (finalCorrect) {
+        // -1 XP per hint used
+        progressStore.getState().addXp(-hintsUsed);
       }
     }
 
@@ -333,16 +435,26 @@ export default function App() {
 
     lessonStore.getState().submitAnswer(finalCorrect, currentVerseRef);
 
-    const pState = progressStore.getState();
-    const currentRecord = pState.entries.find(e => e.verseReference === currentVerse.verseReference) || {
-      verseReference: currentVerse.verseReference,
-      intervalDays: 0,
-      nextReviewDate: new Date().toISOString(),
-      repetitions: 0
-    };
+    if (isReviewMode) {
+      const pState = progressStore.getState();
+      const currentRecord = pState.entries.find(e => e.verseReference === currentVerse.verseReference) || {
+        verseReference: currentVerse.verseReference,
+        intervalDays: 0,
+        nextReviewDate: new Date().toISOString(),
+        repetitions: 0
+      };
 
-    const nextRecord = computeNextReview(currentRecord, finalCorrect);
-    pState.addOrUpdate(nextRecord);
+      const nextRecord = computeNextReview(currentRecord, finalCorrect);
+      pState.addOrUpdate(nextRecord);
+    }
+
+    if (finalCorrect) {
+      if (currentMode === "SCRIBE") {
+        audioService.playScribeFinish();
+      } else {
+        audioService.playCorrect();
+      }
+    }
 
     setFeedbackStatus(finalCorrect ? "correct" : "incorrect");
   };
@@ -410,7 +522,7 @@ export default function App() {
         </View>
       )}
 
-      {username === null ? (
+      {uid === null ? (
         <WelcomeScreen onDismiss={() => setActiveScreen("path")} />
       ) : (
         <>
@@ -423,9 +535,12 @@ export default function App() {
           {activeScreen === "league" && <LeagueScreen />}
           {activeScreen === "profile" && <ProfileScreen />}
           {activeScreen === "library" && <LibraryScreen />}
+          {activeScreen === "customPaths" && (
+            <CustomPathsScreen onStartLesson={() => setActiveScreen("lesson")} />
+          )}
           {activeScreen === "lesson" && (
             <LessonEngine
-              onBackToPath={() => setActiveScreen("path")}
+              onBackToPath={() => setActiveScreen(isCustomPath ? "customPaths" : "path")}
               isLoading={isLoading}
               offlineError={offlineError}
               verses={verses}
@@ -492,6 +607,18 @@ export default function App() {
                 <Text style={[styles.navText, activeScreen === "library" && styles.navTextActive]}>Library</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[styles.navTab, activeScreen === "customPaths" && styles.navTabActive]}
+                onPress={() => setActiveScreen("customPaths")}
+              >
+                <FontAwesome5 
+                  name="list-ul" 
+                  size={18} 
+                  color={activeScreen === "customPaths" ? "#4A90D9" : "#888"} 
+                  style={{ marginBottom: 4 }}
+                />
+                <Text style={[styles.navText, activeScreen === "customPaths" && styles.navTextActive]}>Playlists</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={[styles.navTab, activeScreen === "profile" && styles.navTabActive]}
                 onPress={() => setActiveScreen("profile")}
               >
@@ -545,6 +672,36 @@ function LessonEngine({
   currentQuestionIndex,
   lessonId,
 }: LessonEngineProps) {
+  const colorAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    colorAnim.setValue(0);
+    Animated.sequence([
+      Animated.delay(400), // Wait for screen transition to settle
+      Animated.timing(colorAnim, {
+        toValue: 1,
+        duration: 1200, // Slow, beautiful golden glow sweep
+        useNativeDriver: false,
+      }),
+      Animated.delay(1000), // Hold the golden focus glow for a second
+      Animated.timing(colorAnim, {
+        toValue: 0,
+        duration: 1800, // Gentle, elegant dissolve back to resting blue
+        useNativeDriver: false,
+      }),
+    ]).start();
+  }, [currentVerseRef]);
+
+  const textColor = colorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["#2E75C4", "#F5A623"],
+  });
+
+  const textBg = colorAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: ["rgba(46, 117, 196, 0)", "rgba(245, 166, 35, 0.12)", "rgba(46, 117, 196, 0)"],
+  });
+
   React.useEffect(() => {
     const saveSession = () => {
       const isReview = lessonStore.getState().isReviewMode;
@@ -624,15 +781,63 @@ function LessonEngine({
       <View style={{ flex: 1, padding: 16 }}>
         {/* Top Header - Only show during exercise phase */}
         {currentMode !== "INTRO" && (
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
-            <Text style={{ fontSize: 20, fontWeight: "bold", color: "#333", flex: 1 }}>
-              {currentMode === "NAVIGATOR_EASY" || currentMode === "NAVIGATOR_HARD" 
-                ? "Where is this verse found?" 
-                : `Solve: ${currentVerse.verseReference}`}
-            </Text>
+          <View style={{
+            backgroundColor: "#FFFFFF",
+            borderColor: "#E2E8F0",
+            borderWidth: 1,
+            borderRadius: 14,
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            marginBottom: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            shadowColor: "#0F172A",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.05,
+            shadowRadius: 10,
+            elevation: 2,
+          }}>
+            <FontAwesome5 name="book-open" size={18} color="#2E75C4" style={{ marginRight: 12 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: "800", color: "#2E75C4", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
+                Active Verse
+              </Text>
+              {currentMode === "NAVIGATOR_EASY" || currentMode === "NAVIGATOR_HARD" ? (
+                <Text style={{ fontSize: 17, fontWeight: "800", color: "#1E293B" }}>
+                  Where is this verse found?
+                </Text>
+              ) : (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text style={{ fontSize: 15, fontWeight: "600", color: "#64748B", marginRight: 6 }}>
+                    Solve:
+                  </Text>
+                  <Animated.View style={{
+                    backgroundColor: textBg,
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    borderRadius: 8,
+                  }}>
+                    <Animated.Text style={{
+                      fontSize: 21,
+                      fontWeight: "900",
+                      color: textColor,
+                    }}>
+                      {currentVerse.verseReference}
+                    </Animated.Text>
+                  </Animated.View>
+                </View>
+              )}
+            </View>
             {currentVerse.masteryTrack && (
-              <View style={{ backgroundColor: "#E8F5E9", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
-                <Text style={{ color: "#388E3C", fontSize: 12, fontWeight: "bold" }}>
+              <View style={{
+                backgroundColor: "#EBF3FF",
+                borderColor: "#D2E4FF",
+                borderWidth: 1,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 20,
+              }}>
+                <Text style={{ color: "#2E75C4", fontSize: 12, fontWeight: "700" }}>
                   Step {currentStep}/{currentVerse.masteryTrack.length}
                 </Text>
               </View>
@@ -660,16 +865,16 @@ function LessonEngine({
             {currentMode === "SCRAMBLE" && (
               <ScrambleQuestion
                 key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse.verseText || ""}
-                decoyWords={currentVerse.decoyWords}
+                targetVerse={currentVerse.verseText || " "}
+                decoyWords={currentVerse.decoyWords || []}
                 onSubmit={handleAnswerSubmit}
               />
             )}
             {currentMode === "MISSING_LINK" && (
               <MissingLinkQuestion
                 key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse.verseText || ""}
-                decoyWords={currentVerse.decoyWords}
+                targetVerse={currentVerse.verseText || " "}
+                decoyWords={currentVerse.decoyWords || []}
                 blankCount={currentMissingCount}
                 onSubmit={handleAnswerSubmit}
               />
@@ -686,6 +891,7 @@ function LessonEngine({
               <ScribeQuestion
                 key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
                 targetVerse={currentVerse.verseText || ""}
+                isDailyPractice={isReview}
                 onSubmit={handleAnswerSubmit}
               />
             )}

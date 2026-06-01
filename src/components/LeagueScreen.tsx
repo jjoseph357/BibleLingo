@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TextInput, TouchableOpacity, Share } from 'react-native';
 import { useStore } from 'zustand';
 import { progressStore } from '../stores/progressStore';
-import { db, isFirebaseConfigured } from '../services/firebase';
+import { db, isFirebaseConfigured, auth } from '../services/firebase';
 import { 
   collection, query, orderBy, limit, getDocs, where, 
   startAfter, endBefore, limitToLast, getCountFromServer, 
@@ -10,7 +10,7 @@ import {
   addDoc, Timestamp, doc, setDoc, getFirestore
 } from 'firebase/firestore';
 import { FontAwesome5 } from '@expo/vector-icons';
-
+import { LeaguePromotionModal } from './LeaguePromotionModal';
 
 interface UserData {
   id: string;
@@ -26,16 +26,19 @@ type FetchAction = 'TOP' | 'BOTTOM' | 'ME' | 'NEXT' | 'PREV' | 'SEARCH' | 'REFRE
 
 export function LeagueScreen() {
   const username = useStore(progressStore, s => s.username);
+  const uid = useStore(progressStore, s => s.uid);
   const localXp = useStore(progressStore, s => s.xp);
   const localWeeklyXp = useStore(progressStore, s => s.weeklyXp);
   const localStreak = useStore(progressStore, s => s.streakDays);
   
   const localLeagueTier = useStore(progressStore, s => s.leagueTier) || 'Bronze';
+  const pendingPromotion = useStore(progressStore, s => s.pendingPromotion);
+  const clearPendingPromotion = progressStore.getState().clearPendingPromotion;
   
   const [leaderboard, setLeaderboard] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [activeTab, setActiveTab] = useState<TabType>('ALL_TIME');
+  const [activeTab, setActiveTab] = useState<TabType>('WEEKLY');
   const [searchQuery, setSearchQuery] = useState('');
   
   // High-Five tracking: which users we've sent to today
@@ -48,7 +51,7 @@ export function LeagueScreen() {
   const [pageOffset, setPageOffset] = useState(0);
   const [firstVisible, setFirstVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
-
+ 
   // League Timer
   const [timeToClose, setTimeToClose] = useState<string>('');
 
@@ -75,11 +78,13 @@ export function LeagueScreen() {
   }, []);
 
   const fetchMetadata = useCallback(async () => {
-    if (!isFirebaseConfigured || !db || !username) return;
+    if (!isFirebaseConfigured || !db || !username || !auth?.currentUser || uid === "offline-user") return;
     try {
       const usersRef = collection(db, 'users');
-      // Total count in current league
-      const totalQuery = query(usersRef, where('leagueTier', '==', localLeagueTier));
+      // Total count
+      const totalQuery = activeTab === 'ALL_TIME' 
+        ? query(usersRef)
+        : query(usersRef, where('leagueTier', '==', localLeagueTier));
       const totalSnapshot = await getCountFromServer(totalQuery);
       setTotalPlayers(totalSnapshot.data().count);
 
@@ -87,23 +92,22 @@ export function LeagueScreen() {
       const orderField = activeTab === 'ALL_TIME' ? 'xp' : 'weeklyXp';
       const myVal = activeTab === 'ALL_TIME' ? localXp : localWeeklyXp;
       
-      const rankQuery = query(
-        usersRef, 
-        where('leagueTier', '==', localLeagueTier),
-        where(orderField, '>', myVal)
-      );
+      const rankQuery = activeTab === 'ALL_TIME'
+        ? query(usersRef, where(orderField, '>', myVal))
+        : query(usersRef, where('leagueTier', '==', localLeagueTier), where(orderField, '>', myVal));
+        
       const rankSnapshot = await getCountFromServer(rankQuery);
       setMyRank(rankSnapshot.data().count + 1);
     } catch (err) {
       console.error("Failed to fetch metadata", err);
     }
-  }, [activeTab, localXp, localWeeklyXp, username, localLeagueTier]);
+  }, [activeTab, localXp, localWeeklyXp, username, localLeagueTier, uid]);
 
   const fetchLeaderboard = async (action: FetchAction = 'REFRESH') => {
     try {
       setLoading(true);
 
-      if (!isFirebaseConfigured || !db) {
+      if (!isFirebaseConfigured || !db || !auth?.currentUser || uid === "offline-user") {
         const data: UserData[] = [];
         if (username) {
           data.push({ id: 'me', name: username, xp: localXp, weeklyXp: localWeeklyXp, streakDays: localStreak, isMe: true });
@@ -132,24 +136,34 @@ export function LeagueScreen() {
       // 2. Pagination Actions
       else {
         if (action === 'TOP' || action === 'REFRESH') {
-          q = query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'desc'), limit(50));
+          q = activeTab === 'ALL_TIME'
+            ? query(usersRef, orderBy(orderField, 'desc'), limit(50))
+            : query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'desc'), limit(50));
           newOffset = 0;
         } 
         else if (action === 'BOTTOM') {
-          q = query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'asc'), limit(50));
+          q = activeTab === 'ALL_TIME'
+            ? query(usersRef, orderBy(orderField, 'asc'), limit(50))
+            : query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'asc'), limit(50));
           isBottom = true;
         } 
         else if (action === 'NEXT' && lastVisible) {
-          q = query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'desc'), startAfter(lastVisible), limit(50));
+          q = activeTab === 'ALL_TIME'
+            ? query(usersRef, orderBy(orderField, 'desc'), startAfter(lastVisible), limit(50))
+            : query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'desc'), startAfter(lastVisible), limit(50));
           newOffset += 50;
         } 
         else if (action === 'PREV' && firstVisible) {
-          q = query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'desc'), endBefore(firstVisible), limitToLast(50));
+          q = activeTab === 'ALL_TIME'
+            ? query(usersRef, orderBy(orderField, 'desc'), endBefore(firstVisible), limitToLast(50))
+            : query(usersRef, where('leagueTier', '==', localLeagueTier), orderBy(orderField, 'desc'), endBefore(firstVisible), limitToLast(50));
           newOffset = Math.max(0, newOffset - 50);
         } 
         else if (action === 'ME') {
           const myVal = activeTab === 'ALL_TIME' ? localXp : localWeeklyXp;
-          q = query(usersRef, where('leagueTier', '==', localLeagueTier), where(orderField, '<=', myVal), orderBy(orderField, 'desc'), limit(50));
+          q = activeTab === 'ALL_TIME'
+            ? query(usersRef, where(orderField, '<=', myVal), orderBy(orderField, 'desc'), limit(50))
+            : query(usersRef, where('leagueTier', '==', localLeagueTier), where(orderField, '<=', myVal), orderBy(orderField, 'desc'), limit(50));
           newOffset = myRank ? Math.max(0, myRank - 1) : 0;
         }
       }
@@ -180,7 +194,7 @@ export function LeagueScreen() {
       const data: UserData[] = [];
       docs.forEach(doc => {
         const d = doc.data();
-        const isMe = d.username.toLowerCase() === username?.toLowerCase();
+        const isMe = doc.id === uid;
         data.push({
           id: doc.id,
           name: d.username,
@@ -190,6 +204,14 @@ export function LeagueScreen() {
           isMe
         });
       });
+
+      // If the query returns completely empty (e.g. user just joined a new league and hasn't synced to Cloud),
+      // we inject the current user locally so they don't see an empty screen.
+      if (data.length === 0 && action !== 'NEXT' && action !== 'PREV' && username) {
+        data.push({ id: uid || 'me', name: username, xp: localXp, weeklyXp: localWeeklyXp, streakDays: localStreak, isMe: true });
+        if (totalPlayers === 0) setTotalPlayers(1);
+        if (myRank === null || myRank === 0) setMyRank(1);
+      }
 
       setLeaderboard(data);
     } catch (err) {
@@ -212,24 +234,48 @@ export function LeagueScreen() {
 
   const getZoneType = (rank: number | null, total: number) => {
     if (rank === null || total === 0) return 'NONE';
+    
+    if (activeTab === 'ALL_TIME') {
+      // All-Time leaderboard doesn't have promotions/demotions. Just highlight the top 3 players!
+      if (rank <= 3) return 'PROMOTION'; 
+      return 'NONE';
+    }
+
     const zoneSize = total >= 15 ? 5 : total >= 6 ? 3 : 1;
-    if (rank <= zoneSize) return 'PROMOTION';
-    if (rank > total - zoneSize) return 'DEMOTION';
-    return 'NONE';
+    const MAX_ACTIVE_LEAGUE = 'Bronze';
+    
+    let zone = 'NONE';
+    
+    // Top players
+    if (rank <= zoneSize) {
+      zone = 'PROMOTION'; 
+      // Even if they are at MAX_ACTIVE_LEAGUE and can't technically promote, 
+      // we still highlight them green as the "winners" of the league week.
+    }
+    
+    // Bottom players
+    if (rank > total - zoneSize) {
+      zone = 'DEMOTION';
+      // You cannot demote from Bronze, so we shouldn't paint the bottom players red in Bronze.
+      if (localLeagueTier === 'Bronze') {
+        zone = 'NONE';
+      }
+    }
+    
+    return zone;
   };
 
-  const sendHighFive = async (recipientName: string) => {
+  const sendHighFive = async (recipientId: string, recipientName: string) => {
     if (!username || !isFirebaseConfigured || !db) return;
-    const recipientLower = recipientName.toLowerCase();
-    if (sentToday.has(recipientLower)) return;
+    if (sentToday.has(recipientId)) return;
 
     // UI cooldown to prevent double-taps
     setHighFiveCooldown(true);
     setTimeout(() => setHighFiveCooldown(false), 2000);
 
     try {
-      // Write to recipient's highFives subcollection
-      const hfRef = collection(db, 'users', recipientLower, 'highFives');
+      // Write to recipient's highFives subcollection using their UID
+      const hfRef = collection(db, 'users', recipientId, 'highFives');
       await addDoc(hfRef, {
         from: username,
         timestamp: new Date().toISOString(),
@@ -237,7 +283,7 @@ export function LeagueScreen() {
       });
 
       // Track locally so we can't send again
-      setSentToday(prev => new Set(prev).add(recipientLower));
+      setSentToday(prev => new Set(prev).add(recipientId));
 
       // Award sender +1 crown (capped at 10/day in addHighFiveCrown)
       const awarded = progressStore.getState().addHighFiveCrown();
@@ -251,27 +297,48 @@ export function LeagueScreen() {
     }
   };
 
+  const handleShare = async () => {
+    try {
+      const activeXp = activeTab === 'ALL_TIME' ? localXp : localWeeklyXp;
+      const rankText = myRank ? ` ranked #${myRank}` : "";
+      const message = `I am currently climbing the ranks in the ${localLeagueTier} League on BibleLingo! 🏆 I've earned ${activeXp} XP${rankText}! Can you beat my score? ⚡\n\nPlay BibleLingo here: https://biblelingo.app`;
+      await Share.share({
+        message,
+      });
+    } catch (error) {
+      console.error("Error sharing rank:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{localLeagueTier} League</Text>
         <Text style={styles.subtitle}>
-          Climb the ranks by earning XP. League closes in: {timeToClose}
+          Climb the ranks by earning XP. Closes in: {timeToClose}
         </Text>
+        <TouchableOpacity
+          style={styles.shareButton}
+          onPress={handleShare}
+          activeOpacity={0.85}
+        >
+          <FontAwesome5 name="share-alt" size={12} color="#FFF" style={{ marginRight: 6 }} />
+          <Text style={styles.shareButtonText}>Share</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'ALL_TIME' && styles.tabActive]}
-          onPress={() => { setActiveTab('ALL_TIME'); setSearchQuery(''); }}
-        >
-          <Text style={[styles.tabText, activeTab === 'ALL_TIME' && styles.tabTextActive]}>All-Time</Text>
-        </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tab, activeTab === 'WEEKLY' && styles.tabActive]}
           onPress={() => { setActiveTab('WEEKLY'); setSearchQuery(''); }}
         >
           <Text style={[styles.tabText, activeTab === 'WEEKLY' && styles.tabTextActive]}>Weekly</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'ALL_TIME' && styles.tabActive]}
+          onPress={() => { setActiveTab('ALL_TIME'); setSearchQuery(''); }}
+        >
+          <Text style={[styles.tabText, activeTab === 'ALL_TIME' && styles.tabTextActive]}>All-Time</Text>
         </TouchableOpacity>
       </View>
 
@@ -344,15 +411,15 @@ export function LeagueScreen() {
                   <TouchableOpacity
                     style={[
                       styles.highFiveButton,
-                      (sentToday.has(item.name.toLowerCase()) || highFiveCooldown) && styles.highFiveButtonDisabled
+                      (sentToday.has(item.id) || highFiveCooldown) && styles.highFiveButtonDisabled
                     ]}
-                    onPress={() => sendHighFive(item.name)}
-                    disabled={sentToday.has(item.name.toLowerCase()) || highFiveCooldown}
+                    onPress={() => sendHighFive(item.id, item.name)}
+                    disabled={sentToday.has(item.id) || highFiveCooldown}
                   >
                     <FontAwesome5 
                       name="hand-paper" 
                       size={14} 
-                      color={sentToday.has(item.name.toLowerCase()) ? "#ccc" : "#FF9500"} 
+                      color={sentToday.has(item.id) ? "#ccc" : "#FF9500"} 
                     />
                   </TouchableOpacity>
                 )}
@@ -403,6 +470,16 @@ export function LeagueScreen() {
           }}
         />
       )}
+
+      {pendingPromotion && (
+        <LeaguePromotionModal
+          visible={!!pendingPromotion}
+          fromTier={pendingPromotion.from}
+          toTier={pendingPromotion.to}
+          status={pendingPromotion.status}
+          onClose={clearPendingPromotion}
+        />
+      )}
     </View>
   );
 }
@@ -415,18 +492,25 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingVertical: 16,
+    position: 'relative',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFEFEF',
+    backgroundColor: '#FFF',
+    marginBottom: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
     color: '#333',
     textAlign: 'center',
+    paddingHorizontal: 75,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 2,
+    paddingHorizontal: 75,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -625,5 +709,26 @@ const styles = StyleSheet.create({
   highFiveButtonDisabled: {
     backgroundColor: '#F5F5F5',
     borderColor: '#E0E0E0',
+  },
+  shareButton: {
+    position: 'absolute',
+    top: 14,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4A90D9',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    shadowColor: '#4A90D9',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  shareButtonText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

@@ -24,26 +24,53 @@ export function generateDecoyReferences(correctRef: string): string[] {
 
   const decoys = new Set<string>();
 
-  // Strategy 1: Vary verse number (±1 to ±4)
-  const verseOffsets = [-2, -1, 1, 2, 3, 4];
-  for (const offset of verseOffsets) {
-    if (decoys.size >= 3) break;
-    const newVerse = primaryVerse + offset;
-    if (newVerse >= 1) {
-      const candidate = `${bookName} ${chapter}:${newVerse}`;
-      if (candidate !== correctRef) decoys.add(candidate);
+  // Strategy 1: Rank-based uniform offset generator.
+  // We randomly select a target rank (0 to 3) representing how many decoys should be smaller than the correct verse.
+  // This guarantees the correct verse is equally likely to be the min, max, or middle option, completely neutralizing
+  // both min/max range-filtering exploits and statistical average/mean exploits.
+  const maxNegativeCount = primaryVerse - 1;
+  const maxRankAllowed = Math.min(3, maxNegativeCount);
+  const targetRank = Math.floor(Math.random() * (maxRankAllowed + 1));
+
+  const negativeCount = targetRank;
+  const positiveCount = 3 - targetRank;
+  const selectedOffsets: number[] = [];
+
+  // Generate unique negative offsets
+  if (negativeCount > 0) {
+    const negPool = [1, 2, 3, 4, 5].filter(v => v <= maxNegativeCount);
+    const shuffledNegs = negPool.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < negativeCount; i++) {
+      selectedOffsets.push(-shuffledNegs[i]);
     }
   }
 
-  // Strategy 2: Vary chapter number (if still need more)
+  // Generate unique positive offsets
+  if (positiveCount > 0) {
+    const posPool = [1, 2, 3, 4, 5];
+    const shuffledPos = posPool.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < positiveCount; i++) {
+      selectedOffsets.push(shuffledPos[i]);
+    }
+  }
+
+  for (const offset of selectedOffsets) {
+    const candidate = `${bookName} ${chapter}:${primaryVerse + offset}`;
+    if (candidate !== correctRef) {
+      decoys.add(candidate);
+    }
+  }
+
+  // Strategy 2: Vary chapter number (if we still need more decoys due to low verse pools)
   if (decoys.size < 3) {
-    const chapterOffsets = [-1, 1, 2];
-    for (const offset of chapterOffsets) {
+    const chapterOffsets = [-2, -1, 1, 2, 3];
+    const validChapterOffsets = chapterOffsets.filter(offset => chapter + offset >= 1);
+    const shuffledChapters = [...validChapterOffsets].sort(() => Math.random() - 0.5);
+    for (const offset of shuffledChapters) {
       if (decoys.size >= 3) break;
-      const newChapter = chapter + offset;
-      if (newChapter >= 1) {
-        const candidate = `${bookName} ${newChapter}:${primaryVerse}`;
-        if (candidate !== correctRef) decoys.add(candidate);
+      const candidate = `${bookName} ${chapter + offset}:${primaryVerse}`;
+      if (candidate !== correctRef) {
+        decoys.add(candidate);
       }
     }
   }
