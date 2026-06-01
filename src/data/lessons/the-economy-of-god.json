@@ -1,376 +1,380 @@
 [
   {
-    "lessonId": "eog-01",
+    "lessonId": "eog-c1-s1a",
     "bookPath": "The Economy of God",
-    "unitTitle": "The Triune God",
-    "verseReference": "2 Cor. 13:14",
-    "difficulty": "Easy",
-    "themeTags": [
-      "Triune God",
-      "Divine Dispensing"
-    ],
-    "decoyWords": [
-      "the mercy of God",
-      "the power of Christ",
-      "the communion of saints",
-      "the blessing of peace"
-    ]
-  },
-  {
-    "lessonId": "eog-02",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Triune God",
-    "verseReference": "Matt. 28:19",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "The Economy of the Triune God (Part 1)",
+    "verseReference": "1 Tim. 1:3",
     "difficulty": "Medium",
     "themeTags": [
-      "Triune God",
-      "Baptism"
+      "Different Things",
+      "Charge"
     ],
     "decoyWords": [
-      "the names of God",
-      "the title of the Lord",
-      "the three persons",
-      "the teachings of Jesus"
+      "teach the same things",
+      "listen to the apostles",
+      "teach the law of Moses",
+      "preach the gospel only"
     ]
   },
   {
-    "lessonId": "eog-03",
+    "lessonId": "eog-c1-s1a",
     "bookPath": "The Economy of God",
-    "unitTitle": "God's Economy",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "The Economy of the Triune God (Part 1)",
     "verseReference": "1 Tim. 1:4",
-    "difficulty": "Medium",
+    "difficulty": "Hard",
     "themeTags": [
+      "Myths",
       "God's Economy"
     ],
     "decoyWords": [
-      "the old dispensation",
-      "God's divine plan",
-      "the kingdom of heaven",
-      "the purpose of God"
+      "rather than human philosophy",
+      "which produce peace and love",
+      "produce endless arguments",
+      "rather than God's law"
     ]
   },
   {
-    "lessonId": "eog-04",
+    "lessonId": "eog-c1-s1a",
     "bookPath": "The Economy of God",
-    "unitTitle": "God's Economy",
-    "verseReference": "Eph. 1:10",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "The Economy of the Triune God (Part 1)",
+    "verseReference": "1 Tim. 1:5",
     "difficulty": "Hard",
     "themeTags": [
-      "God's Economy",
-      "Heading Up"
+      "Pure Heart",
+      "Good Conscience"
     ],
     "decoyWords": [
-      "the dispensation of grace",
-      "to gather all men",
-      "to restore the earth",
-      "to unite the nations"
+      "out of a holy spirit",
+      "out of a strong will",
+      "out of good deeds",
+      "out of perfect knowledge"
     ]
   },
   {
-    "lessonId": "eog-05",
+    "lessonId": "eog-c1-s1b",
     "bookPath": "The Economy of God",
-    "unitTitle": "The Economy of the Mystery",
-    "verseReference": "Eph. 3:9",
-    "difficulty": "Hard",
-    "themeTags": [
-      "God's Economy",
-      "Mystery"
-    ],
-    "decoyWords": [
-      "the stewardship of grace",
-      "the administration of God",
-      "His divine plan",
-      "the counsel of His will"
-    ]
-  },
-  {
-    "lessonId": "eog-06",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Two Spirits",
-    "verseReference": "Rom. 8:16",
-    "difficulty": "Easy",
-    "themeTags": [
-      "Two Spirits",
-      "Assurance"
-    ],
-    "decoyWords": [
-      "our human soul",
-      "our inner heart",
-      "our renewed mind",
-      "the sons of men"
-    ]
-  },
-  {
-    "lessonId": "eog-07",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Two Spirits",
-    "verseReference": "1 Cor. 6:17",
-    "difficulty": "Easy",
-    "themeTags": [
-      "Two Spirits",
-      "Organic Union"
-    ],
-    "decoyWords": [
-      "one living soul",
-      "one physical body",
-      "one renewed mind",
-      "one pure heart"
-    ]
-  },
-  {
-    "lessonId": "eog-08",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Three Parts of Man",
-    "verseReference": "1 Thes. 5:23",
-    "difficulty": "Hard",
-    "themeTags": [
-      "Tripartite Man",
-      "Sanctification"
-    ],
-    "decoyWords": [
-      "your pure heart",
-      "your sober mind",
-      "your mortal flesh",
-      "your inner strength"
-    ]
-  },
-  {
-    "lessonId": "eog-09",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Three Parts of Man",
-    "verseReference": "Heb. 4:12",
-    "difficulty": "Hard",
-    "themeTags": [
-      "Tripartite Man",
-      "The Word"
-    ],
-    "decoyWords": [
-      "active and powerful",
-      "flesh and bones",
-      "feelings and emotions",
-      "desires of the mind"
-    ]
-  },
-  {
-    "lessonId": "eog-10",
-    "bookPath": "The Economy of God",
-    "unitTitle": "Regeneration",
-    "verseReference": "John 3:6",
-    "difficulty": "Easy",
-    "themeTags": [
-      "Regeneration",
-      "Two Spirits"
-    ],
-    "decoyWords": [
-      "born of the soul",
-      "born of water",
-      "born of blood",
-      "born of the body"
-    ]
-  },
-  {
-    "lessonId": "eog-11",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Processed Triune God",
-    "verseReference": "Rev. 22:17",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "The Economy of the Triune God (Part 2)",
+    "verseReference": "1 Tim. 1:6",
     "difficulty": "Medium",
     "themeTags": [
-      "The Spirit",
-      "The Bride"
+      "Misaimed",
+      "Vain Talking"
     ],
     "decoyWords": [
-      "the universal church",
-      "the holy angel",
-      "the slain lamb",
-      "the holy saints"
+      "turned aside to the world",
+      "turned aside to idolatry",
+      "having lost their faith",
+      "having loved the present age"
     ]
   },
   {
-    "lessonId": "eog-12",
+    "lessonId": "eog-c1-s1b",
     "bookPath": "The Economy of God",
-    "unitTitle": "The Processed Triune God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "The Economy of the Triune God (Part 2)",
+    "verseReference": "1 Tim. 1:7",
+    "difficulty": "Easy",
+    "themeTags": [
+      "Teachers",
+      "The Law"
+    ],
+    "decoyWords": [
+      "teachers of the gospel",
+      "prophets of the Lord",
+      "apostles of Christ",
+      "leaders of the church"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s2",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "The Definition of God's Economy",
+    "verseReference": "John 4:24",
+    "difficulty": "Easy",
+    "themeTags": [
+      "God is Spirit",
+      "Substance"
+    ],
+    "decoyWords": [
+      "God is light",
+      "God is love",
+      "worship in mind and soul",
+      "worship with good deeds"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s3",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "The Steps of God's Economy",
+    "verseReference": "2 Cor. 13:14",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Grace",
+      "Fellowship"
+    ],
+    "decoyWords": [
+      "the mercy of the Lord",
+      "the peace of God",
+      "the power of the Holy Spirit",
+      "the joy of the Lord"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4a",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 1)",
+    "verseReference": "1 Tim. 6:16",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Unapproachable Light",
+      "Invisible"
+    ],
+    "decoyWords": [
+      "dwelling in thick darkness",
+      "dwelling in heavenly places",
+      "whom many have seen",
+      "who walks among men"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4a",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 1)",
+    "verseReference": "Col. 1:19",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Fullness",
+      "Dwell"
+    ],
+    "decoyWords": [
+      "all the power was pleased",
+      "all the glory was pleased",
+      "all the grace was given",
+      "half of the fullness"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4a",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 1)",
+    "verseReference": "Col. 2:9",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Godhead",
+      "Bodily"
+    ],
+    "decoyWords": [
+      "fullness of the Spirit spiritually",
+      "fullness of grace and truth",
+      "fullness of the angels",
+      "fullness of power mentally"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4b",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 2)",
+    "verseReference": "John 1:18",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Seen God",
+      "Declared Him"
+    ],
+    "decoyWords": [
+      "many have seen God",
+      "the great prophet declared Him",
+      "who is at the right hand",
+      "He has hidden Him"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4b",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 2)",
+    "verseReference": "John 1:1",
+    "difficulty": "Easy",
+    "themeTags": [
+      "The Word",
+      "With God"
+    ],
+    "decoyWords": [
+      "the Spirit was with God",
+      "the Word was an angel",
+      "In the beginning was the Spirit",
+      "the Word became God"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4b",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 2)",
+    "verseReference": "Col. 1:15",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Image",
+      "Invisible God"
+    ],
+    "decoyWords": [
+      "the shadow of the Almighty",
+      "the last of all creation",
+      "the reflection of the Father",
+      "the firstborn of the dead"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4c",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 3)",
+    "verseReference": "John 10:30",
+    "difficulty": "Easy",
+    "themeTags": [
+      "The Father",
+      "One"
+    ],
+    "decoyWords": [
+      "I and the Spirit are one",
+      "We are completely separate",
+      "I am the Father",
+      "We are two Gods"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s4c",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "From the Father (Part 3)",
+    "verseReference": "Isa. 9:6",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Son Given",
+      "Eternal Father"
+    ],
+    "decoyWords": [
+      "a prophet is given",
+      "Eternal Spirit",
+      "Mighty Angel",
+      "Prince of the Earth"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s5a",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "Through the Spirit (Part 1)",
+    "verseReference": "John 15:26",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Spirit of Reality",
+      "Comforter"
+    ],
+    "decoyWords": [
+      "the Spirit of power",
+      "whom the angels will send",
+      "He will judge the world",
+      "who proceeds from the Son only"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s5a",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "Through the Spirit (Part 1)",
+    "verseReference": "2 Cor. 3:17",
+    "difficulty": "Medium",
+    "themeTags": [
+      "Lord is the Spirit",
+      "Freedom"
+    ],
+    "decoyWords": [
+      "the Lord is the Father",
+      "there is strict law",
+      "there is deep peace",
+      "the Spirit is the Son"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s5a",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "Through the Spirit (Part 1)",
     "verseReference": "1 Cor. 15:45",
+    "difficulty": "Hard",
+    "themeTags": [
+      "Last Adam",
+      "Life-giving Spirit"
+    ],
+    "decoyWords": [
+      "became a mighty warrior",
+      "the first man became a spirit",
+      "became a powerful angel",
+      "the second Adam became a soul"
+    ]
+  },
+  {
+    "lessonId": "eog-c1-s5b",
+    "bookPath": "The Economy of God",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "Through the Spirit (Part 2)",
+    "verseReference": "Eph. 4:6",
     "difficulty": "Medium",
     "themeTags": [
-      "Life-giving Spirit",
-      "Last Adam"
+      "Father of All",
+      "In All"
     ],
     "decoyWords": [
-      "the first man",
-      "a dying soul",
-      "a physical body",
-      "the power of death"
+      "who is far away from all",
+      "over the Jews only",
+      "through some and in some",
+      "One Lord and Spirit of all"
     ]
   },
   {
-    "lessonId": "eog-13",
+    "lessonId": "eog-c1-s5b",
     "bookPath": "The Economy of God",
-    "unitTitle": "The Divine Dispensing",
-    "verseReference": "Eph. 3:16",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "Through the Spirit (Part 2)",
+    "verseReference": "2 Cor. 13:5",
     "difficulty": "Hard",
     "themeTags": [
-      "Divine Dispensing",
-      "Inner Man"
+      "Christ in You",
+      "Test Yourselves"
     ],
     "decoyWords": [
-      "the outer man",
-      "strengthened with life",
-      "by His life",
-      "according to His riches"
+      "the Holy Spirit is upon you",
+      "God the Father is with you",
+      "test the church leaders",
+      "unless you are weak"
     ]
   },
   {
-    "lessonId": "eog-14",
+    "lessonId": "eog-c1-s5b",
     "bookPath": "The Economy of God",
-    "unitTitle": "The Divine Dispensing",
-    "verseReference": "Eph. 3:17",
+    "chapterTitle": "Chapter One: The Economy of the Triune God",
+    "unitTitle": "Through the Spirit (Part 2)",
+    "verseReference": "Rom. 8:11",
     "difficulty": "Hard",
     "themeTags": [
-      "Divine Dispensing",
-      "Inner Man"
+      "Raised Jesus",
+      "Indwells You"
     ],
     "decoyWords": [
-      "the inner man",
-      "in your soul",
-      "in your mind",
-      "your physical body",
-      "may take delight"
-    ]
-  },
-  {
-    "lessonId": "eog-15",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Divine Dispensing",
-    "verseReference": "Rom. 8:10",
-    "difficulty": "Medium",
-    "themeTags": [
-      "Christ in Us",
-      "Life"
-    ],
-    "decoyWords": [
-      "the living soul",
-      "the good works",
-      "the great power",
-      "the written law"
-    ]
-  },
-  {
-    "lessonId": "eog-16",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Mingling of God with Man",
-    "verseReference": "John 15:5",
-    "difficulty": "Medium",
-    "themeTags": [
-      "Abiding",
-      "Organic Union"
-    ],
-    "decoyWords": [
-      "are the servants",
-      "are my followers",
-      "can do something",
-      "are the disciples"
-    ]
-  },
-  {
-    "lessonId": "eog-17",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Mingling of God with Man",
-    "verseReference": "Gal. 2:20",
-    "difficulty": "Hard",
-    "themeTags": [
-      "Crucified with Christ",
-      "Christ Lives in Me"
-    ],
-    "decoyWords": [
-      "by good works",
-      "of the law",
-      "in my self",
-      "of the flesh"
-    ]
-  },
-  {
-    "lessonId": "eog-18a",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Church as the Body",
-    "verseReference": "Eph. 1:22",
-    "difficulty": "Hard",
-    "themeTags": [
-      "The Body of Christ",
-      "Fullness"
-    ],
-    "decoyWords": [
-      "is His kingdom",
-      "is His temple",
-      "is His building",
-      "is His bride"
-    ]
-  },
-  {
-    "lessonId": "eog-18b",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Church as the Body",
-    "verseReference": "Eph. 1:23",
-    "difficulty": "Hard",
-    "themeTags": [
-      "The Body of Christ",
-      "Fullness"
-    ],
-    "decoyWords": [
-      "is His kingdom",
-      "is His temple",
-      "is His building",
-      "is His bride"
-    ]
-  },
-  {
-    "lessonId": "eog-19",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Church as the Body",
-    "verseReference": "1 Cor. 12:13",
-    "difficulty": "Medium",
-    "themeTags": [
-      "One Body",
-      "One Spirit"
-    ],
-    "decoyWords": [
-      "into one soul",
-      "into one church",
-      "in one water",
-      "in one blood"
-    ]
-  },
-  {
-    "lessonId": "eog-20",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Transformation of the Soul",
-    "verseReference": "Rom. 12:2",
-    "difficulty": "Medium",
-    "themeTags": [
-      "Transformation",
-      "Renewing of the Mind"
-    ],
-    "decoyWords": [
-      "be completely conformed",
-      "by the improving",
-      "be outwardly changed",
-      "by the reforming"
-    ]
-  },
-  {
-    "lessonId": "eog-21",
-    "bookPath": "The Economy of God",
-    "unitTitle": "The Transformation of the Soul",
-    "verseReference": "2 Cor. 3:18",
-    "difficulty": "Hard",
-    "themeTags": [
-      "Transformation",
-      "Glory"
-    ],
-    "decoyWords": [
-      "are being changed",
-      "are being improved",
-      "are being reformed",
-      "are being conformed"
+      "will also give life to your soul",
+      "through your own strong faith",
+      "dwells in the heavens",
+      "who raised Lazarus from the dead"
     ]
   }
 ]
