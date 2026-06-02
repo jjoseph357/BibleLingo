@@ -5,12 +5,13 @@ import { FontAwesome5 } from "@expo/vector-icons";
 interface Props {
   status: "idle" | "correct" | "incorrect";
   targetVerseText: string;
+  xpEarned?: number;
   onContinue: () => void;
 }
 
 const SHEET_HEIGHT = 200;
 
-export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Props) {
+export function GlobalFeedbackSheet({ status, targetVerseText, xpEarned = 10, onContinue }: Props) {
   const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.4)).current;
@@ -90,7 +91,7 @@ export function GlobalFeedbackSheet({ status, targetVerseText, onContinue }: Pro
               ]}
             >
               <FontAwesome5 name="star" size={26} color="#FFD93D" solid style={{ marginRight: 8, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 1, height: 2 }, textShadowRadius: 4 }} />
-              <Text style={styles.floatingXpText}>+10 XP</Text>
+              <Text style={styles.floatingXpText}>+{xpEarned} XP</Text>
             </Animated.View>
           )}
         </View>

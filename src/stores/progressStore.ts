@@ -63,6 +63,7 @@ export interface ProgressState {
 
   // Virtual Economy & Gamification
   crowns: number;
+  hasUsedFreeNameChange: boolean;
   streakFreezes: number;
   nodeSkin: string;
   ownedSkins: string[];
@@ -97,8 +98,11 @@ export interface ProgressState {
   unlockAchievement: (id: string) => void;
   incrementPerfectScribes: () => void;
   incrementEarlyMorningsCount: () => void;
+  isSigningUp: boolean;
+  setIsSigningUp: (val: boolean) => void;
   setUid: (uid: string | null) => void;
   setUsername: (name: string | null) => void;
+  changeUsername: (newName: string) => Promise<void>;
   showToast: (message: string) => void;
   saveLessonSession: (
     lessonId: string,
@@ -150,7 +154,9 @@ export const progressStore = createStore<ProgressState>()(
       lessonSessions: {},
       earlyMorningsCount: 0,
       uid: null,
-      username: null,
+      isSigningUp: false,
+      username: "Player",
+      hasUsedFreeNameChange: false,
       
       crowns: 0,
       streakFreezes: 0,
@@ -201,8 +207,8 @@ export const progressStore = createStore<ProgressState>()(
             next.push({
               verseReference: v.verseReference,
               intervalDays: 0,
-              easeFactor: 2.5,
               nextReviewDate: nowStr, // Due immediately
+              repetitions: 0,
             });
             changed = true;
           }
@@ -486,9 +492,8 @@ export const progressStore = createStore<ProgressState>()(
       incrementPerfectScribes: () =>
         set((state) => ({ perfectScribes: state.perfectScribes + 1 })),
       
-      incrementEarlyMorningsCount: () =>
-        set((state) => ({ earlyMorningsCount: state.earlyMorningsCount + 1 })),
-      
+      incrementEarlyMorningsCount: () => set((state) => ({ earlyMorningsCount: state.earlyMorningsCount + 1 })),
+      setIsSigningUp: (val: boolean) => set({ isSigningUp: val }),
       setUid: (uid) => set({ uid }),
       setUsername: (name) => set({ username: name }),
       
@@ -556,6 +561,7 @@ export const progressStore = createStore<ProgressState>()(
           const cleanUser = JSON.parse(JSON.stringify({
             username: state.username,
             usernameLower: state.username.toLowerCase(),
+            hasUsedFreeNameChange: state.hasUsedFreeNameChange,
             xp: state.xp,
             weeklyXp: state.weeklyXp,
             activeWeekStr: state.activeWeekStr,
@@ -641,6 +647,36 @@ export const progressStore = createStore<ProgressState>()(
         if (changed) {
           get().syncToCloud();
         }
+      },
+
+      changeUsername: async (newName: string) => {
+        const state = get();
+        if (!state.uid || state.uid === "offline-user") return;
+        
+        let cost = 0;
+        if (state.hasUsedFreeNameChange) {
+          cost = 500;
+          if (state.crowns < cost) {
+            throw new Error("Not enough Crowns.");
+          }
+        }
+        
+        // Update user doc in Firestore
+        if (isFirebaseConfigured && db && auth?.currentUser) {
+          const userRef = doc(db, 'users', state.uid);
+          await updateDoc(userRef, {
+            username: newName,
+            usernameLower: newName.toLowerCase()
+          });
+        }
+        
+        set((s) => ({
+          username: newName,
+          hasUsedFreeNameChange: true,
+          crowns: s.crowns - cost
+        }));
+        
+        await get().syncToCloud();
       },
 
       updateDailyQuest: (quest) => {

@@ -13,7 +13,7 @@ import { OfflineError } from "./src/components/OfflineError";
 import { ScrambleQuestion } from "./src/components/ScrambleQuestion";
 import { CopyrightFooter } from "./src/components/CopyrightFooter";
 import { customPathStore } from "./src/stores/customPathStore";
-import { TouchableOpacity, Text, View, KeyboardAvoidingView, Platform, AppState, Animated } from "react-native";
+import { TouchableOpacity, Text, View, KeyboardAvoidingView, Platform, AppState, Animated, ScrollView } from "react-native";
 import { useAchievements } from "./src/hooks/useAchievements";
 import { useFonts } from "expo-font";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -68,6 +68,8 @@ export default function App() {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       const state = progressStore.getState();
+      if (state.isSigningUp) return; // Wait for WelcomeScreen to manually finish
+      
       if (user) {
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -127,6 +129,7 @@ export default function App() {
   const [lastShownIntroReference, setLastShownIntroReference] = React.useState<string | null>(null);
   // Track if any mistake was made in the current lesson session to calculate the perfect score bonus
   const [hasFailedAny, setHasFailedAny] = React.useState(false);
+  const [lastEarnedXp, setLastEarnedXp] = React.useState<number>(10);
 
   const {
     isLoading,
@@ -233,7 +236,9 @@ export default function App() {
           }
         }
       }
-      if (!progressStore.getState().xpBoostEndTime) {
+      const now = new Date();
+      const hasActiveBoost = progressStore.getState().xpBoostEndTime && new Date(progressStore.getState().xpBoostEndTime!) > now;
+      if (!hasActiveBoost) {
         progressStore.getState().activateXpBoost();
       }
       
@@ -417,21 +422,32 @@ export default function App() {
     const currentVerse = verses.find(v => v.verseReference === currentVerseRef);
     if (!currentVerse) return;
 
-    // Scribe hint penalty: if more than half the words were revealed, treat as incorrect
     let finalCorrect = isCorrect;
+    let earnedXp = 0;
+    
+    const totalWords = (currentVerse.verseText || "").trim().split(/\s+/).length;
+
+    // Scribe hint penalty: if more than half the words were revealed, treat as incorrect
     if (currentMode === "SCRIBE" && hintsUsed && hintsUsed > 0) {
-      const totalWords = (currentVerse.verseText || "").trim().split(/\s+/).length;
       if (hintsUsed > Math.floor(totalWords / 2)) {
         finalCorrect = false;
-      } else if (finalCorrect) {
-        // -1 XP per hint used
-        progressStore.getState().addXp(-hintsUsed);
       }
     }
 
     if (!finalCorrect) {
       setHasFailedAny(true);
+    } else {
+      if (currentMode === "SCRIBE") {
+        const baseScribeXp = 10 + totalWords; // Base 10 XP + 1 XP per word
+        earnedXp = baseScribeXp - (hintsUsed || 0);
+        audioService.playScribeFinish();
+      } else {
+        earnedXp = 10;
+        audioService.playCorrect();
+      }
+      progressStore.getState().addXp(earnedXp);
     }
+    setLastEarnedXp(earnedXp);
 
     lessonStore.getState().submitAnswer(finalCorrect, currentVerseRef);
 
@@ -446,14 +462,6 @@ export default function App() {
 
       const nextRecord = computeNextReview(currentRecord, finalCorrect);
       pState.addOrUpdate(nextRecord);
-    }
-
-    if (finalCorrect) {
-      if (currentMode === "SCRIBE") {
-        audioService.playScribeFinish();
-      } else {
-        audioService.playCorrect();
-      }
     }
 
     setFeedbackStatus(finalCorrect ? "correct" : "incorrect");
@@ -500,6 +508,7 @@ export default function App() {
       if (nextStepIndex > track.length) {
         progressStore.getState().addXp(3); // Micro-XP!
         progressStore.getState().updateStreak(); // Instant Streak Protection!
+        progressStore.getState().updateDailyQuest("studiedNew"); // Complete daily quest
         progressStore.getState().showToast("Verse Mastered! +3 XP!");
         progressStore.getState().syncToCloud(); // Sync score to cloud instantly!
       }
@@ -564,6 +573,7 @@ export default function App() {
                   ? `Correct Reference: ${feedbackVerse.verseReference}`
                   : feedbackVerse.verseText || ""
               }
+              xpEarned={lastEarnedXp}
               onContinue={handleFeedbackContinue}
             />
           )}
@@ -767,152 +777,158 @@ function LessonEngine({
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <TouchableOpacity
-        style={{ padding: 16, backgroundColor: '#eee' }}
-        onPress={onBackToPath}
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <Text>← Back to Path (Quit)</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={{ padding: 16, backgroundColor: '#eee' }}
+          onPress={onBackToPath}
+        >
+          <Text>← Back to Path (Quit)</Text>
+        </TouchableOpacity>
 
-      <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
-        <ProgressBar progress={lessonProgress} />
-      </View>
+        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <ProgressBar progress={lessonProgress} />
+        </View>
 
-      <View style={{ flex: 1, padding: 16 }}>
-        {/* Top Header - Only show during exercise phase */}
-        {currentMode !== "INTRO" && (
-          <View style={{
-            backgroundColor: "#FFFFFF",
-            borderColor: "#E2E8F0",
-            borderWidth: 1,
-            borderRadius: 14,
-            paddingVertical: 14,
-            paddingHorizontal: 16,
-            marginBottom: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            shadowColor: "#0F172A",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.05,
-            shadowRadius: 10,
-            elevation: 2,
-          }}>
-            <FontAwesome5 name="book-open" size={18} color="#2E75C4" style={{ marginRight: 12 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 11, fontWeight: "800", color: "#2E75C4", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
-                Active Verse
-              </Text>
-              {currentMode === "NAVIGATOR_EASY" || currentMode === "NAVIGATOR_HARD" ? (
-                <Text style={{ fontSize: 17, fontWeight: "800", color: "#1E293B" }}>
-                  Where is this verse found?
+        <View style={{ flex: 1, padding: 16 }}>
+          {/* Top Header - Only show during exercise phase */}
+          {currentMode !== "INTRO" && (
+            <View style={{
+              backgroundColor: "#FFFFFF",
+              borderColor: "#E2E8F0",
+              borderWidth: 1,
+              borderRadius: 14,
+              paddingVertical: 14,
+              paddingHorizontal: 16,
+              marginBottom: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              shadowColor: "#0F172A",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.05,
+              shadowRadius: 10,
+              elevation: 2,
+            }}>
+              <FontAwesome5 name="book-open" size={18} color="#2E75C4" style={{ marginRight: 12 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 11, fontWeight: "800", color: "#2E75C4", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
+                  Active Verse
                 </Text>
-              ) : (
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={{ fontSize: 15, fontWeight: "600", color: "#64748B", marginRight: 6 }}>
-                    Solve:
+                {currentMode === "NAVIGATOR_EASY" || currentMode === "NAVIGATOR_HARD" ? (
+                  <Text style={{ fontSize: 17, fontWeight: "800", color: "#1E293B" }}>
+                    Where is this verse found?
                   </Text>
-                  <Animated.View style={{
-                    backgroundColor: textBg,
-                    paddingHorizontal: 8,
-                    paddingVertical: 3,
-                    borderRadius: 8,
-                  }}>
-                    <Animated.Text style={{
-                      fontSize: 21,
-                      fontWeight: "900",
-                      color: textColor,
+                ) : (
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Text style={{ fontSize: 15, fontWeight: "600", color: "#64748B", marginRight: 6 }}>
+                      Solve:
+                    </Text>
+                    <Animated.View style={{
+                      backgroundColor: textBg,
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      borderRadius: 8,
                     }}>
-                      {currentVerse.verseReference}
-                    </Animated.Text>
-                  </Animated.View>
+                      <Animated.Text style={{
+                        fontSize: 21,
+                        fontWeight: "900",
+                        color: textColor,
+                      }}>
+                        {currentVerse.verseReference}
+                      </Animated.Text>
+                    </Animated.View>
+                  </View>
+                )}
+              </View>
+              {currentVerse.masteryTrack && (
+                <View style={{
+                  backgroundColor: "#EBF3FF",
+                  borderColor: "#D2E4FF",
+                  borderWidth: 1,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: 20,
+                }}>
+                  <Text style={{ color: "#2E75C4", fontSize: 12, fontWeight: "700" }}>
+                    Step {currentStep}/{currentVerse.masteryTrack.length}
+                  </Text>
                 </View>
               )}
             </View>
-            {currentVerse.masteryTrack && (
-              <View style={{
-                backgroundColor: "#EBF3FF",
-                borderColor: "#D2E4FF",
-                borderWidth: 1,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderRadius: 20,
-              }}>
-                <Text style={{ color: "#2E75C4", fontSize: 12, fontWeight: "700" }}>
-                  Step {currentStep}/{currentVerse.masteryTrack.length}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
+          )}
 
-        {currentMode === "INTRO" ? (
-          <View style={{ flex: 1, justifyContent: "center" }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", color: "#666", textAlign: "center", marginBottom: 12 }}>
-              Read: {currentVerse.verseReference}
-            </Text>
-            <Text style={{ fontSize: 24, lineHeight: 34, color: "#444", textAlign: "center", marginBottom: 40 }}>
-              "{currentVerse.verseText}"
-            </Text>
-            <TouchableOpacity
-              style={{ backgroundColor: "#4A90D9", padding: 16, borderRadius: 12, alignItems: "center" }}
-              onPress={handleIntroComplete}
-            >
-              <Text style={{ color: "#FFF", fontSize: 18, fontWeight: "bold" }}>Continue to Exercise</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            {currentMode === "SCRAMBLE" && (
-              <ScrambleQuestion
-                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse.verseText || " "}
-                decoyWords={currentVerse.decoyWords || []}
-                onSubmit={handleAnswerSubmit}
-              />
-            )}
-            {currentMode === "MISSING_LINK" && (
-              <MissingLinkQuestion
-                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse.verseText || " "}
-                decoyWords={currentVerse.decoyWords || []}
-                blankCount={currentMissingCount}
-                onSubmit={handleAnswerSubmit}
-              />
-            )}
-            {currentMode === "TYPE_BLANK" && (
-              <TypeBlankQuestion
-                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse.verseText || ""}
-                missingCount={currentMissingCount}
-                onSubmit={handleAnswerSubmit}
-              />
-            )}
-            {currentMode === "SCRIBE" && (
-              <ScribeQuestion
-                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse.verseText || ""}
-                isDailyPractice={isReview}
-                onSubmit={handleAnswerSubmit}
-              />
-            )}
-            {currentMode === "NAVIGATOR_EASY" && (
-              <NavigatorEasyQuestion
-                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse}
-                onSubmit={handleAnswerSubmit}
-              />
-            )}
-            {currentMode === "NAVIGATOR_HARD" && (
-              <NavigatorHardQuestion
-                key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
-                targetVerse={currentVerse}
-                onSubmit={handleAnswerSubmit}
-              />
-            )}
-          </>
-        )}
-      </View>
-      <CopyrightFooter text={copyrightText} />
+          {currentMode === "INTRO" ? (
+            <View style={{ flex: 1, justifyContent: "center" }}>
+              <Text style={{ fontSize: 22, fontWeight: "bold", color: "#666", textAlign: "center", marginBottom: 12 }}>
+                Read: {currentVerse.verseReference}
+              </Text>
+              <Text style={{ fontSize: 24, lineHeight: 34, color: "#444", textAlign: "center", marginBottom: 40 }}>
+                "{currentVerse.verseText}"
+              </Text>
+              <TouchableOpacity
+                style={{ backgroundColor: "#4A90D9", padding: 16, borderRadius: 12, alignItems: "center" }}
+                onPress={handleIntroComplete}
+              >
+                <Text style={{ color: "#FFF", fontSize: 18, fontWeight: "bold" }}>Continue to Exercise</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {currentMode === "SCRAMBLE" && (
+                <ScrambleQuestion
+                  key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                  targetVerse={currentVerse.verseText || " "}
+                  decoyWords={currentVerse.decoyWords || []}
+                  onSubmit={handleAnswerSubmit}
+                />
+              )}
+              {currentMode === "MISSING_LINK" && (
+                <MissingLinkQuestion
+                  key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                  targetVerse={currentVerse.verseText || " "}
+                  decoyWords={currentVerse.decoyWords || []}
+                  blankCount={currentMissingCount}
+                  onSubmit={handleAnswerSubmit}
+                />
+              )}
+              {currentMode === "TYPE_BLANK" && (
+                <TypeBlankQuestion
+                  key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                  targetVerse={currentVerse.verseText || ""}
+                  missingCount={currentMissingCount}
+                  onSubmit={handleAnswerSubmit}
+                />
+              )}
+              {currentMode === "SCRIBE" && (
+                <ScribeQuestion
+                  key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                  targetVerse={currentVerse.verseText || ""}
+                  isDailyPractice={isReview}
+                  onSubmit={handleAnswerSubmit}
+                />
+              )}
+              {currentMode === "NAVIGATOR_EASY" && (
+                <NavigatorEasyQuestion
+                  key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                  targetVerse={currentVerse}
+                  onSubmit={handleAnswerSubmit}
+                />
+              )}
+              {currentMode === "NAVIGATOR_HARD" && (
+                <NavigatorHardQuestion
+                  key={`${currentVerse.verseReference}_${currentQuestionIndex}`}
+                  targetVerse={currentVerse}
+                  onSubmit={handleAnswerSubmit}
+                />
+              )}
+            </>
+          )}
+        </View>
+        <CopyrightFooter text={copyrightText} />
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

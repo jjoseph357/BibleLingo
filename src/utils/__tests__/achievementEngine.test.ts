@@ -32,7 +32,7 @@ describe("achievementEngine", () => {
   });
 
   test("initial achievements list contains all expanded tiers", () => {
-    expect(ALL_ACHIEVEMENTS.length).toBe(15);
+    expect(ALL_ACHIEVEMENTS.length).toBe(38);
     expect(ALL_ACHIEVEMENTS.find(a => a.id === "good_land_explorer_1")).toBeDefined();
     expect(ALL_ACHIEVEMENTS.find(a => a.id === "good_land_explorer_2")).toBeDefined();
     expect(ALL_ACHIEVEMENTS.find(a => a.id === "the_overcomer_3")).toBeDefined();

@@ -1,4 +1,6 @@
 import { progressStore } from "../stores/progressStore";
+import { db, auth, isFirebaseConfigured } from "../services/firebase";
+import { doc, setDoc, increment } from "firebase/firestore";
 
 export const ALL_ACHIEVEMENTS = [
   // 1. The Good Land Explorer
@@ -60,8 +62,8 @@ export const ALL_ACHIEVEMENTS = [
   { id: "vigilant_sentinel_1", title: "Vigilant Sentinel", description: "Completely clear your Daily Practice queue." },
 
   // 14. Deeply Rooted
-  { id: "deeply_rooted_1", title: "Deeply Rooted I", description: "Raise a verse to Box 4 (Interval >= 15)." },
-  { id: "deeply_rooted_2", title: "Deeply Rooted II", description: "Raise a verse to Box 5 (Interval >= 30)." },
+  { id: "deeply_rooted_1", title: "Deeply Rooted I", description: "Raise a verse to Mastery 4 (Interval >= 15)." },
+  { id: "deeply_rooted_2", title: "Deeply Rooted II", description: "Raise a verse to Mastery 5 (Interval >= 30)." },
 
   // 15. The Whole Counsel
   { id: "whole_counsel_1", title: "The Whole Counsel I", description: "Memorize verses across 3 different books." },
@@ -236,6 +238,7 @@ export function checkAchievements() {
   const pStore = progressStore.getState();
   const achievements = [...pStore.achievements];
   const newlyUnlocked: string[] = [];
+  const newlyUnlockedIds: string[] = [];
 
   for (const cat of ACHIEVEMENT_CATEGORIES) {
     const value = cat.getValue(pStore);
@@ -244,11 +247,30 @@ export function checkAchievements() {
         pStore.unlockAchievement(tier.id);
         achievements.push(tier.id);
         newlyUnlocked.push(`🏆 Achievement Unlocked: ${tier.title}!`);
+        newlyUnlockedIds.push(tier.id);
       }
     }
   }
 
   if (newlyUnlocked.length > 0) {
     pStore.showToast(newlyUnlocked.join("\n"));
+
+    // Play crown sound for achievements
+    import("../services/AudioService").then(({ audioService }) => {
+      audioService.playCrown();
+    }).catch(e => console.warn("Failed to load audioService for achievement", e));
+
+    if (isFirebaseConfigured && db && auth && auth.currentUser) {
+      const statsRef = doc(db, 'stats', 'achievements');
+      const updates: Record<string, any> = {};
+
+      for (const id of newlyUnlockedIds) {
+        updates[`counts.${id}`] = increment(1);
+      }
+
+      setDoc(statsRef, updates, { merge: true }).catch(err => {
+        console.warn("Failed to update global achievement stats:", err);
+      });
+    }
   }
 }

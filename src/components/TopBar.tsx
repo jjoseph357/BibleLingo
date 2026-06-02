@@ -41,11 +41,11 @@ export function TopBar() {
     <View style={styles.container}>
       {/* Streak Indicator */}
       <View style={styles.badge}>
-        <FontAwesome5 
-          name="fire" 
-          size={18} 
-          color={isStreakActiveToday ? "#FF9500" : "#A0A0A0"} 
-          style={styles.iconMargin} 
+        <FontAwesome5
+          name="fire"
+          size={18}
+          color={isStreakActiveToday ? "#FF9500" : "#A0A0A0"}
+          style={styles.iconMargin}
         />
         <Text style={[styles.text, isStreakActiveToday ? styles.streakActive : styles.streakInactive]}>
           {streakDays}
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     color: "#A0A0A0",
   },
   xpText: {
-    color: "#4A90D9", 
+    color: "#4A90D9",
   },
   shopButton: {
     flexDirection: 'row',

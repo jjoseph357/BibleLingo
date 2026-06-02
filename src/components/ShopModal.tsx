@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { isUsernameTaken } from '../utils/username';
+import { Filter } from 'bad-words';
 import { useStore } from 'zustand';
 import { progressStore } from '../stores/progressStore';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -14,8 +16,15 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
   const streakFreezes = useStore(progressStore, s => s.streakFreezes);
   const nodeSkin = useStore(progressStore, s => s.nodeSkin);
   const ownedSkins = useStore(progressStore, s => s.ownedSkins) || ['default'];
+  const hasUsedFreeNameChange = useStore(progressStore, s => s.hasUsedFreeNameChange);
   const buyStreakFreeze = useStore(progressStore, s => s.buyStreakFreeze);
   const buyNodeSkin = useStore(progressStore, s => s.buyNodeSkin);
+  const changeUsername = useStore(progressStore, s => s.changeUsername);
+
+  const [nameModalVisible, setNameModalVisible] = React.useState(false);
+  const [newNameInput, setNewNameInput] = React.useState("");
+  const [nameError, setNameError] = React.useState<string | null>(null);
+  const [isChangingName, setIsChangingName] = React.useState(false);
 
   const handleBuyFreeze = () => {
     if (crowns >= 50) {
@@ -26,11 +35,59 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
   };
 
   const handleBuySkin = (skinId: string, cost: number) => {
-    if (nodeSkin === skinId) return; // Already owned/equipped
+    if (nodeSkin === skinId) return; // Already equipped
+    if (ownedSkins.includes(skinId)) {
+      buyNodeSkin(skinId);
+      return;
+    }
     if (crowns >= cost) {
       buyNodeSkin(skinId);
     } else {
       Alert.alert("Not enough Crowns", `You need ${cost} Crowns to buy this skin.`);
+    }
+  };
+
+  const handleOpenNameChange = () => {
+    if (hasUsedFreeNameChange && crowns < 500) {
+      Alert.alert("Not enough Crowns", "You need 500 Crowns to change your name.");
+      return;
+    }
+    setNewNameInput("");
+    setNameError(null);
+    setNameModalVisible(true);
+  };
+
+  const submitNameChange = async () => {
+    setNameError(null);
+    const trimmed = newNameInput.trim();
+    if (!trimmed) {
+      setNameError("Please enter a username.");
+      return;
+    }
+    if (trimmed.length < 2 || trimmed.length > 20) {
+      setNameError("Username must be between 2 and 20 characters.");
+      return;
+    }
+    const filter = new Filter();
+    if (filter.isProfane(trimmed)) {
+      setNameError("Username contains inappropriate language.");
+      return;
+    }
+
+    setIsChangingName(true);
+    try {
+      const taken = await isUsernameTaken(trimmed);
+      if (taken) {
+        throw new Error("Username is already taken.");
+      }
+
+      await changeUsername(trimmed);
+      setNameModalVisible(false);
+      Alert.alert("Success", "Your name has been updated!");
+    } catch (err: any) {
+      setNameError(err.message || "Failed to change name.");
+    } finally {
+      setIsChangingName(false);
     }
   };
 
@@ -64,7 +121,7 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               <Text style={styles.itemDesc}>Miss a day without losing your streak!</Text>
               <Text style={styles.itemStock}>You own: {streakFreezes}</Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.buyButton, crowns < 50 && styles.buyButtonDisabled]}
               onPress={handleBuyFreeze}
             >
@@ -81,9 +138,9 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               <Text style={styles.itemName}>Classic Node Skin</Text>
               <Text style={styles.itemDesc}>The standard learning path nodes.</Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.buyButton, 
+                styles.buyButton,
                 nodeSkin === 'default' && styles.equippedButton
               ]}
               onPress={() => buyNodeSkin('default')}
@@ -98,15 +155,15 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
           {/* Obsidian Skin */}
           <View style={styles.itemCard}>
             <View style={[styles.itemIconContainer, { backgroundColor: '#333' }]}>
-              <FontAwesome5 name="gem" size={32} color="#FFF" />
+              <FontAwesome5 name="moon" size={32} color="#FFF" />
             </View>
             <View style={styles.itemInfo}>
-              <Text style={styles.itemName}>Obsidian Node Skin</Text>
-              <Text style={styles.itemDesc}>Sleek dark nodes for your learning path.</Text>
+              <Text style={styles.itemName}>Night Node Skin</Text>
+              <Text style={styles.itemDesc}>A beautiful night sky path with dark stones.</Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.buyButton, 
+                styles.buyButton,
                 nodeSkin === 'obsidian' && styles.equippedButton,
                 nodeSkin !== 'obsidian' && !ownedSkins.includes('obsidian') && crowns < 150 && styles.buyButtonDisabled
               ]}
@@ -128,9 +185,9 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               <Text style={styles.itemName}>Golden Node Skin</Text>
               <Text style={styles.itemDesc}>Radiant golden nodes for true scholars.</Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.buyButton, 
+                styles.buyButton,
                 nodeSkin === 'gold' && styles.equippedButton,
                 nodeSkin !== 'gold' && !ownedSkins.includes('gold') && crowns < 500 && styles.buyButtonDisabled
               ]}
@@ -142,8 +199,59 @@ export function ShopModal({ visible, onClose }: ShopModalProps) {
               </Text>
             </TouchableOpacity>
           </View>
+
+          {/* Name Change */}
+          <View style={styles.itemCard}>
+            <View style={[styles.itemIconContainer, { backgroundColor: '#E8F5E9' }]}>
+              <FontAwesome5 name="user-edit" size={32} color="#4CAF50" />
+            </View>
+            <View style={styles.itemInfo}>
+              <Text style={styles.itemName}>Change Username</Text>
+              <Text style={styles.itemDesc}>Update your display name. The first one is free!</Text>
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.buyButton,
+                hasUsedFreeNameChange && crowns < 500 && styles.buyButtonDisabled
+              ]}
+              onPress={handleOpenNameChange}
+            >
+              <Text style={styles.buyButtonText}>
+                {!hasUsedFreeNameChange ? 'FREE' : '500 Crowns'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
+
+      {/* Name Change Modal */}
+      <Modal visible={nameModalVisible} transparent animationType="fade">
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
+          <View style={styles.nameModalContent}>
+            <Text style={styles.nameModalTitle}>Change Username</Text>
+            <Text style={styles.nameModalDesc}>
+              {!hasUsedFreeNameChange ? "This first name change is completely free!" : "This will cost 500 Crowns."}
+            </Text>
+            <TextInput
+              style={[styles.nameInput, nameError ? styles.nameInputError : null]}
+              placeholder="Enter new username"
+              value={newNameInput}
+              onChangeText={(txt) => { setNewNameInput(txt); setNameError(null); }}
+              autoCapitalize="words"
+              maxLength={20}
+            />
+            {nameError && <Text style={styles.errorText}>{nameError}</Text>}
+            <View style={styles.nameModalActions}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setNameModalVisible(false)} disabled={isChangingName}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.confirmBtn, isChangingName && styles.buyButtonDisabled]} onPress={submitNameChange} disabled={isChangingName}>
+                {isChangingName ? <ActivityIndicator color="#FFF" /> : <Text style={styles.confirmBtnText}>Confirm</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </Modal>
   );
 }
@@ -168,6 +276,86 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     color: '#333',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  nameModalContent: {
+    backgroundColor: '#FFF',
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  nameModalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#333',
+    marginBottom: 8,
+  },
+  nameModalDesc: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  nameInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  nameInputError: {
+    borderColor: '#EF4444',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  nameModalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 12,
+  },
+  cancelBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginRight: 12,
+  },
+  cancelBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  confirmBtn: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 100,
+  },
+  confirmBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFF',
   },
   closeButton: {
     padding: 4,

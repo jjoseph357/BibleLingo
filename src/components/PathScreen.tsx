@@ -83,9 +83,9 @@ const NODE_COLORS_MAP: Record<string, Record<UnitStatus, { bg: string; border: s
     locked: { bg: "#1E1E24", border: "#111115", glow: "transparent", text: "#444", shadow: "#111115" },
   },
   gold: {
-    completed: { bg: "#FFC107", border: "#FF8F00", glow: "rgba(255,193,7,0.6)", text: "#795548", shadow: "#FF8F00" },
-    current: { bg: "#FFCA28", border: "#FFA000", glow: "rgba(255,202,40,0.8)", text: "#5D4037", shadow: "#FFA000" },
-    locked: { bg: "#FFE082", border: "#FFCA28", glow: "transparent", text: "#C19A6B", shadow: "#FFCA28" },
+    completed: { bg: "#EAB308", border: "#CA8A04", glow: "rgba(234, 179, 8, 0.6)", text: "#FFF", shadow: "#A16207" },
+    current: { bg: "#FDE047", border: "#FACC15", glow: "rgba(253, 224, 71, 0.8)", text: "#713F12", shadow: "#EAB308" },
+    locked: { bg: "#FEF9C3", border: "#FEF08A", glow: "transparent", text: "#CA8A04", shadow: "#FDE047" },
   },
 };
 
@@ -98,9 +98,10 @@ interface StoneNodeProps {
   isCurrent: boolean;
   sessionProgress: number | null;
   zIndex?: number;
+  skin: string;
 }
 
-function StoneNode({ unit, x, y, colors, onPress, isCurrent, sessionProgress, zIndex }: StoneNodeProps) {
+function StoneNode({ unit, x, y, colors, onPress, isCurrent, sessionProgress, zIndex, skin }: StoneNodeProps) {
   const bounceAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
 
@@ -137,7 +138,7 @@ function StoneNode({ unit, x, y, colors, onPress, isCurrent, sessionProgress, zI
   const cx = x + NODE_SIZE / 2;
   const sideMargin = Math.max(0, (SCREEN_WIDTH - PATH_WIDTH) / 2);
   const screenX = cx + sideMargin;
-  
+
   // To keep the label perfectly centered under the node without overflowing the screen,
   // its maximum width is 2x the distance to the closest screen edge.
   // We apply a minimum width of 140 to prevent it from getting unreadably narrow.
@@ -270,7 +271,7 @@ function StoneNode({ unit, x, y, colors, onPress, isCurrent, sessionProgress, zI
         {/* Progress indicator */}
         {sessionProgress !== null && sessionProgress < 1 && (
           <View style={{ marginTop: 4, width: 50, height: 4, backgroundColor: "rgba(0,0,0,0.1)", borderRadius: 2, overflow: "hidden" }}>
-            <View style={{ width: `${Math.round(sessionProgress * 100)}%` as any, height: 4, backgroundColor: "#4A90D9", borderRadius: 2 }} />
+            <View style={{ width: `${Math.round(sessionProgress * 100)}%` as any, height: 4, backgroundColor: skin === "gold" ? "#EAB308" : (skin === "obsidian" ? "#00E676" : "#4A90D9"), borderRadius: 2 }} />
           </View>
         )}
       </TouchableOpacity>
@@ -281,25 +282,65 @@ function StoneNode({ unit, x, y, colors, onPress, isCurrent, sessionProgress, zI
 
 // ── Main Component ──────────────────────────────────────────
 
-interface Props {
-  onStartLesson?: () => void;
-  onStartReview?: () => void;
-}
-
-export function PathScreen({ onStartLesson, onStartReview }: Props) {
+export function PathScreen({ onStartLesson, onStartReview }: { onStartLesson?: () => void; onStartReview?: () => void }) {
   const isAllUnlocked = useStore(pathStore, (s) => s.isAllUnlocked);
-  const progressEntries = useStore(progressStore, (s) => s.entries);
-  const lessonSessions = useStore(progressStore, (s) => s.lessonSessions);
-  const nodeSkin = useStore(progressStore, (s) => s.nodeSkin) || "default";
+  const { nodeSkin, entries: progressEntries, dailyQuests, lessonSessions } = useStore(progressStore);
 
   const sections = useMemo(() => getGroupedLessons(), [isAllUnlocked, progressEntries, lessonSessions]);
 
+  const [showChestAnimation, setShowChestAnimation] = React.useState(false);
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollY = useRef(0);
+  const sectionYOffsets = useRef<Record<number, number>>({});
+  const playableNodesRef = useRef<{ sectionIdx: number; ny: number }[]>([]);
+  playableNodesRef.current = [];
+
+  const scrollToNextPlayable = () => {
+    const currentY = scrollY.current;
+    const centerY = currentY + Dimensions.get("window").height / 2;
+    let targetY = Infinity;
+
+    for (const node of playableNodesRef.current) {
+      const sy = sectionYOffsets.current[node.sectionIdx] || 0;
+      const absY = sy + 100 + node.ny;
+      if (absY > centerY + 150 && absY < targetY) {
+        targetY = absY;
+      }
+    }
+
+    if (targetY !== Infinity) {
+      scrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - Dimensions.get("window").height / 2), animated: true });
+    } else {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }
+  };
+
+  const scrollToPrevPlayable = () => {
+    const currentY = scrollY.current;
+    const centerY = currentY + Dimensions.get("window").height / 2;
+    let targetY = -Infinity;
+
+    for (const node of playableNodesRef.current) {
+      const sy = sectionYOffsets.current[node.sectionIdx] || 0;
+      const absY = sy + 100 + node.ny;
+      if (absY < centerY - 150 && absY > targetY) {
+        targetY = absY;
+      }
+    }
+
+    if (targetY !== -Infinity) {
+      scrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - Dimensions.get("window").height / 2), animated: true });
+    } else {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    }
+  };
+
+  // Pre-calculate derived data for performance
   const dueCount = useMemo(() => {
     const todayStr = new Date().toISOString();
     return progressEntries.filter((e) => e.nextReviewDate <= todayStr && e.intervalDays > 0).length;
   }, [progressEntries]);
-
-  const [showChestAnimation, setShowChestAnimation] = React.useState(false);
 
   // Accordion state for sections
   const [userToggledSections, setUserToggledSections] = React.useState<Record<string, boolean>>({});
@@ -316,8 +357,8 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
 
   const toggleSection = (section: BookSection) => {
     setUserToggledSections(prev => {
-      const current = prev[section.title] !== undefined 
-        ? prev[section.title] 
+      const current = prev[section.title] !== undefined
+        ? prev[section.title]
         : (section.data.length > 0 && section.data.every(u => u.status === "completed"));
       return { ...prev, [section.title]: !current };
     });
@@ -325,26 +366,28 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
 
   // Auto-complete quests
   const prevDueRef = React.useRef<number | null>(null);
-  
+
   React.useEffect(() => {
     progressStore.getState().updateDailyQuest("readQuote");
-    
+
     const state = progressStore.getState();
     const hasLearnedVerses = state.entries.some(e => e.intervalDays > 0);
-    
+
     if (dueCount === 0 && hasLearnedVerses) {
       state.updateDailyQuest("clearedQueue");
-      
+
       // Only award the XP boost if they actually cleared it this session 
       // (dueCount went from > 0 to 0), so we don't accidentally start a 15-minute timer 
       // the exact second they open the app!
       if (prevDueRef.current !== null && prevDueRef.current > 0) {
-        if (!state.xpBoostEndTime) {
+        const now = new Date();
+        const hasActiveBoost = state.xpBoostEndTime && new Date(state.xpBoostEndTime) > now;
+        if (!hasActiveBoost) {
           state.activateXpBoost();
         }
       }
     }
-    
+
     prevDueRef.current = dueCount;
   }, [dueCount]);
 
@@ -373,14 +416,16 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
 
   const colorPalette = NODE_COLORS_MAP[nodeSkin] || NODE_COLORS_MAP.default;
 
+  const isNight = nodeSkin === "obsidian";
+
   // ── Quote Card ────────────────────────────────────────────
   const QuoteCard = () => (
-    <View style={styles.quoteCard}>
+    <View style={[styles.quoteCard, isNight && { backgroundColor: "rgba(30, 41, 59, 0.8)", borderColor: "rgba(255,255,255,0.1)", borderWidth: 1 }]}>
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-        <FontAwesome5 name="bible" size={18} color="#2E75C4" style={{ marginRight: 8 }} />
-        <Text style={styles.quoteTitle}>2 Timothy 3:16-17</Text>
+        <FontAwesome5 name="bible" size={18} color={isNight ? "#60A5FA" : "#2E75C4"} style={{ marginRight: 8 }} />
+        <Text style={[styles.quoteTitle, isNight && { color: "#FFF" }]}>2 Timothy 3:16-17</Text>
       </View>
-      <Text style={styles.quoteText}>
+      <Text style={[styles.quoteText, isNight && { color: "#E2E8F0" }]}>
         "All Scripture is God-breathed and profitable for teaching, for reproof, for correction, for instruction in righteousness, that the man of God may be complete, fully equipped for every good work."
       </Text>
     </View>
@@ -391,12 +436,11 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
     if (dueCount > 0) {
       return (
         <TouchableOpacity
-          style={styles.practiceCard}
+          style={[styles.practiceCard, isNight && { backgroundColor: "rgba(30, 41, 59, 0.8)", borderColor: "rgba(255,255,255,0.1)", borderWidth: 1 }]}
           activeOpacity={0.85}
           onPress={() => {
             if (!onStartReview) return;
             const todayStr = new Date().toISOString();
-            // Get due entries, sorted by urgency (oldest due date first)
             const sortedDueEntries = progressEntries
               .filter((e) => e.nextReviewDate <= todayStr && e.intervalDays > 0)
               .sort((a, b) => new Date(a.nextReviewDate).getTime() - new Date(b.nextReviewDate).getTime());
@@ -413,8 +457,8 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
               <FontAwesome5 name="book-reader" size={22} color="#FFF" />
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={styles.practiceCardTitle}>Daily Practice</Text>
-              <Text style={styles.practiceCardSubtitle}>
+              <Text style={[styles.practiceCardTitle, isNight && { color: "#FFF" }]}>Daily Practice</Text>
+              <Text style={[styles.practiceCardSubtitle, isNight && { color: "#94A3B8" }]}>
                 {dueCount} {dueCount === 1 ? "verse" : "verses"} due for review
               </Text>
             </View>
@@ -427,11 +471,11 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
       );
     }
     return (
-      <View style={styles.practiceCardDone}>
-        <FontAwesome5 name="check-circle" size={20} color="#2E7D32" style={{ marginRight: 10 }} />
+      <View style={[styles.practiceCardDone, isNight && { backgroundColor: "rgba(30, 41, 59, 0.6)", borderColor: "rgba(76, 175, 80, 0.3)" }]}>
+        <FontAwesome5 name="check-circle" size={20} color={isNight ? "#4CAF50" : "#2E7D32"} style={{ marginRight: 10 }} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.practiceCardDoneTitle}>All Caught Up!</Text>
-          <Text style={styles.practiceCardDoneSubtitle}>Your practice queue is clear. Keep up the excellent work!</Text>
+          <Text style={[styles.practiceCardDoneTitle, isNight && { color: "#4CAF50" }]}>All Caught Up!</Text>
+          <Text style={[styles.practiceCardDoneSubtitle, isNight && { color: "#81C784" }]}>Your practice queue is clear. Keep up the excellent work!</Text>
         </View>
       </View>
     );
@@ -444,22 +488,22 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
     const isAllComplete = dailyQuests.readQuote && dailyQuests.clearedQueue && dailyQuests.studiedNew;
 
     return (
-      <View style={styles.questsCard}>
+      <View style={[styles.questsCard, isNight && { backgroundColor: "rgba(30, 41, 59, 0.8)", borderColor: "rgba(255,255,255,0.1)", borderWidth: 1 }]}>
         <View style={styles.questsHeader}>
-          <FontAwesome5 name="clipboard-list" size={18} color="#4A90D9" />
-          <Text style={styles.questsTitle}>Daily Quests</Text>
+          <FontAwesome5 name="clipboard-list" size={18} color={isNight ? "#60A5FA" : "#4A90D9"} />
+          <Text style={[styles.questsTitle, isNight && { color: "#FFF" }]}>Daily Quests</Text>
         </View>
         <View style={styles.questRow}>
-          <FontAwesome5 name={dailyQuests.readQuote ? "check-circle" : "circle"} size={16} color={dailyQuests.readQuote ? "#2E7D32" : "#ccc"} />
-          <Text style={[styles.questText, dailyQuests.readQuote && styles.questCompleted]}>Read today's 2 Timothy quote</Text>
+          <FontAwesome5 name={dailyQuests.readQuote ? "check-circle" : "circle"} size={16} color={dailyQuests.readQuote ? (isNight ? "#4CAF50" : "#2E7D32") : (isNight ? "#475569" : "#ccc")} />
+          <Text style={[styles.questText, isNight && { color: "#CBD5E1" }, dailyQuests.readQuote && styles.questCompleted, dailyQuests.readQuote && isNight && { color: "#64748B" }]}>Read today's 2 Timothy quote</Text>
         </View>
         <View style={styles.questRow}>
-          <FontAwesome5 name={dailyQuests.clearedQueue ? "check-circle" : "circle"} size={16} color={dailyQuests.clearedQueue ? "#2E7D32" : "#ccc"} />
-          <Text style={[styles.questText, dailyQuests.clearedQueue && styles.questCompleted]}>Clear Daily Practice queue</Text>
+          <FontAwesome5 name={dailyQuests.clearedQueue ? "check-circle" : "circle"} size={16} color={dailyQuests.clearedQueue ? (isNight ? "#4CAF50" : "#2E7D32") : (isNight ? "#475569" : "#ccc")} />
+          <Text style={[styles.questText, isNight && { color: "#CBD5E1" }, dailyQuests.clearedQueue && styles.questCompleted, dailyQuests.clearedQueue && isNight && { color: "#64748B" }]}>Clear Daily Practice queue</Text>
         </View>
         <View style={styles.questRow}>
-          <FontAwesome5 name={dailyQuests.studiedNew ? "check-circle" : "circle"} size={16} color={dailyQuests.studiedNew ? "#2E7D32" : "#ccc"} />
-          <Text style={[styles.questText, dailyQuests.studiedNew && styles.questCompleted]}>Master 1 new verse</Text>
+          <FontAwesome5 name={dailyQuests.studiedNew ? "check-circle" : "circle"} size={16} color={dailyQuests.studiedNew ? (isNight ? "#4CAF50" : "#2E7D32") : (isNight ? "#475569" : "#ccc")} />
+          <Text style={[styles.questText, isNight && { color: "#CBD5E1" }, dailyQuests.studiedNew && styles.questCompleted, dailyQuests.studiedNew && isNight && { color: "#64748B" }]}>Master 1 new verse</Text>
         </View>
         {isAllComplete && (
           <TouchableOpacity
@@ -495,10 +539,21 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
   // ── Render the path ───────────────────────────────────────
   let globalNodeIndex = 0;
 
+  const getBackgroundColor = () => {
+    switch (nodeSkin) {
+      case "obsidian": return "#1E293B"; // Deep dark slate for Obsidian
+      case "gold": return "#FAFAF5"; // Clean gray-gold tint
+      default: return "#F4F6F8"; // Default cool gray
+    }
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#F4F6F8" }}>
+    <View style={{ flex: 1, backgroundColor: getBackgroundColor() }}>
       <TopBar />
       <ScrollView
+        ref={scrollViewRef}
+        onScroll={(e) => { scrollY.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -518,6 +573,13 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
           let activeChapter: string | undefined = undefined;
           const sectionNodes: { unit: GroupedUnit; gi: number; nx: number; ny: number; sessionProgress: number | null }[] = [];
           const chapterBanners: { title: string; y: number; gi: number }[] = [];
+
+          const isCollapsed = isSectionCollapsed(section);
+          
+          let isPrevCollapsed = true;
+          if (sectionIndex > 0) {
+            isPrevCollapsed = isSectionCollapsed(sections[sectionIndex - 1]);
+          }
 
           for (let idx = 0; idx < section.data.length; idx++) {
             const unit = section.data[idx];
@@ -540,6 +602,10 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
             const ny = currentY;
             const session = lessonSessions[unit.id];
             const sessionProgress = session && session.status === "in_progress" ? session.progressPercentage : null;
+
+            if (unit.status === "current" && !isCollapsed) {
+              playableNodesRef.current.push({ sectionIdx: sectionIndex, ny });
+            }
 
             sectionNodes.push({ unit, gi, nx, ny, sessionProgress });
             // Dynamically increase spacing if the title is long to prevent it from overlapping the next stone or banner
@@ -577,10 +643,8 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
             return CHAPTER_COLOR_PALETTES[index];
           };
 
-          const isCollapsed = isSectionCollapsed(section);
-
           return (
-            <View key={section.title} style={{ marginBottom: 10 }}>
+            <View key={section.title} style={{ marginBottom: 10 }} onLayout={(e) => { sectionYOffsets.current[sectionIndex] = e.nativeEvent.layout.y; }}>
               {/* Sleek, Neutral Monochromatic Section Header Card */}
               <TouchableOpacity
                 activeOpacity={0.7}
@@ -590,182 +654,141 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
                   marginBottom: isCollapsed ? 16 : 0, // only bottom margin if collapsed
                   marginHorizontal: 20,
                   padding: 18,
-                  backgroundColor: "#FFFFFF", // Clean pure white
+                  backgroundColor: (isNight || nodeSkin === 'obsidian') ? "rgba(30, 41, 59, 0.8)" : "#FFFFFF",
                   borderRadius: 16,
+                  borderWidth: (isNight || nodeSkin === 'obsidian') ? 1 : 0,
+                  borderColor: "rgba(255,255,255,0.08)",
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.04,
+                  shadowOpacity: (isNight || nodeSkin === 'obsidian') ? 0.2 : 0.04,
                   shadowRadius: 6,
                   elevation: 2,
-                  borderWidth: 1,
-                  borderColor: "rgba(0, 0, 0, 0.08)", // Sleek light gray border
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                  <Text
-                    style={{
-                      fontSize: 17,
-                      fontWeight: "800",
-                      color: "#1E293B", // Sharp premium slate-dark text
-                      flex: 1,
-                      marginRight: 12,
-                      lineHeight: 22,
-                    }}
-                  >
-                    {section.title}
-                  </Text>
-                  <View
-                    style={{
-                      backgroundColor: "#F1F5F9", // Sleek neutral light slate capsule
-                      paddingHorizontal: 8,
-                      paddingVertical: 3,
-                      borderRadius: 10,
-                      alignSelf: "flex-start",
-                      marginTop: 2,
-                    }}
-                  >
-                    <Text style={{ fontSize: 10, fontWeight: "800", color: "#475569" }}>
-                      {completed}/{total} UNITS
+                <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                  {/* Left Side: Title & Subtitle */}
+                  <View style={{ flex: 1, marginRight: 16 }}>
+                    <Text style={{ fontSize: 20, fontWeight: "800", color: (isNight || nodeSkin === 'obsidian') ? "#F8FAFC" : "#1E293B", letterSpacing: -0.5 }}>{section.title}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
+                      <Text style={{ fontSize: 13, fontWeight: "600", color: (isNight || nodeSkin === 'obsidian') ? "#94A3B8" : "#64748B", textTransform: "uppercase", letterSpacing: 1 }}>{total} Stones</Text>
+                      {progress === 1 && (
+                        <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 10 }}>
+                          <FontAwesome5 name="check-circle" size={12} color={(isNight || nodeSkin === 'obsidian') ? "#4CAF50" : "#2E7D32"} />
+                          <Text style={{ fontSize: 12, fontWeight: "700", color: (isNight || nodeSkin === 'obsidian') ? "#4CAF50" : "#2E7D32", marginLeft: 4 }}>MASTERED</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Right Side: Progress Ring */}
+                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: (isNight || nodeSkin === 'obsidian') ? "rgba(255,255,255,0.05)" : "#F8FAFC", alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: (isNight || nodeSkin === 'obsidian') ? "rgba(255,255,255,0.1)" : "#F1F5F9" }}>
+                    <Text style={{ fontSize: 12, fontWeight: "800", color: (isNight || nodeSkin === 'obsidian') ? "#CBD5E1" : "#94A3B8" }}>
+                      {Math.round(progress * 100)}%
                     </Text>
                   </View>
-                  <FontAwesome5 
-                    name={isCollapsed ? "chevron-down" : "chevron-up"} 
-                    size={14} 
-                    color="#94A3B8" 
-                    style={{ marginLeft: 12, marginTop: 2 }} 
-                  />
                 </View>
 
-                {/* Horizontal decorative pattern line */}
-                <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 12 }}>
-                  <View style={{ flex: 1, height: 1, backgroundColor: "rgba(0, 0, 0, 0.08)" }} />
-                  <View
-                    style={{
-                      width: 5,
-                      height: 5,
-                      backgroundColor: "#475569", // Sleek slate diamond 1
-                      transform: [{ rotate: "45deg" }],
-                      marginHorizontal: 4,
-                    }}
-                  />
-                  <View
-                    style={{
-                      width: 5,
-                      height: 5,
-                      backgroundColor: "#475569", // Sleek slate diamond 2
-                      transform: [{ rotate: "45deg" }],
-                      marginHorizontal: 4,
-                    }}
-                  />
-                  <View
-                    style={{
-                      width: 5,
-                      height: 5,
-                      backgroundColor: "#475569", // Sleek slate diamond 3
-                      transform: [{ rotate: "45deg" }],
-                      marginHorizontal: 4,
-                    }}
-                  />
-                  <View style={{ flex: 1, height: 1, backgroundColor: "rgba(0, 0, 0, 0.08)" }} />
-                </View>
-
-                <ProgressBar progress={progress} height={6} color="#334155" />
+                {/* Chevron icon */}
+                <FontAwesome5 name={isCollapsed ? "chevron-down" : "chevron-up"} size={14} color={(isNight || nodeSkin === 'obsidian') ? "#64748B" : "#CBD5E1"} style={{ marginLeft: 12 }} />
               </TouchableOpacity>
 
               {/* Path canvas */}
               {!isCollapsed && (
                 <View style={[styles.pathCanvas, { height: pathHeight, width: PATH_WIDTH }]}>
-                {/* Dirt path background strips */}
-                {sectionNodes.map((n, idx) => {
-                  if (idx === 0) return null;
-                  const prev = sectionNodes[idx - 1];
-                  return (
-                    <PathConnector
-                      key={`conn-${n.gi}`}
-                      x1={prev.nx}
-                      y1={prev.ny}
-                      x2={n.nx}
-                      y2={n.ny}
-                    />
-                  );
-                })}
+                {/* Background scenery / decorations */}
+                <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
+                  {generateDecorations(sectionNodes.map(n => n.ny), sectionStartIndex, nodeSkin, isPrevCollapsed).map((dec, decIdx) => {
+                    return <React.Fragment key={decIdx}>{dec}</React.Fragment>;
+                  })}
+                </View>
+                  {/* Dirt path background strips */}
+                  {nodeSkin !== "gold" && sectionNodes.map((n, idx) => {
+                    if (idx === 0) return null;
+                    const prev = sectionNodes[idx - 1];
+                    return (
+                      <PathConnector
+                        key={`conn-${n.gi}`}
+                        x1={prev.nx}
+                        y1={prev.ny}
+                        x2={n.nx}
+                        y2={n.ny}
+                      />
+                    );
+                  })}
 
-                {/* Decorations */}
-                {generateDecorations(section.data.length, sectionStartIndex).map((dec, decIdx) => {
-                  // If a scenic cluster or decoration overlaps with a banner, we shift it slightly or just let absolute render it.
-                  // Since banners are absolute positioned, standard absolute rendering works perfectly.
-                  return dec;
-                })}
+                  {/* Chapter Banners */}
+                  {chapterBanners.map((cb) => {
+                    const theme = getChapterColors(cb.title);
 
-                {/* Chapter Banners */}
-                {chapterBanners.map((cb) => {
-                  const theme = getChapterColors(cb.title);
-
-                  return (
-                    <View
-                      key={`cb-${cb.gi}`}
-                      style={{
-                        position: "absolute",
-                        top: cb.y,
-                        left: 10,
-                        right: 10,
-                        height: 60,
-                        backgroundColor: "rgba(255, 255, 255, 0.96)",
-                        borderRadius: 16,
-                        borderWidth: 1.5,
-                        borderColor: theme.border,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        shadowColor: theme.border,
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.15,
-                        shadowRadius: 6,
-                        elevation: 4,
-                      }}
-                    >
-                      {/* Micro-glow highlight inside the banner */}
+                    return (
                       <View
+                        key={`cb-${cb.gi}`}
                         style={{
                           position: "absolute",
-                          top: 2,
-                          left: 6,
-                          right: 6,
-                          height: 20,
-                          borderRadius: 10,
-                          backgroundColor: theme.glow,
-                        }}
-                      />
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          fontWeight: "800",
-                          color: theme.text,
-                          letterSpacing: 1.2,
-                          textAlign: "center",
-                          paddingHorizontal: 12,
+                          top: cb.y,
+                          left: 10,
+                          right: 10,
+                          height: 60,
+                          backgroundColor: "rgba(255, 255, 255, 0.96)",
+                          borderRadius: 16,
+                          borderWidth: 1.5,
+                          borderColor: theme.border,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          shadowColor: theme.border,
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.15,
+                          shadowRadius: 6,
+                          elevation: 4,
                         }}
                       >
-                        {cb.title}
-                      </Text>
-                    </View>
-                  );
-                })}
+                        {/* Micro-glow highlight inside the banner */}
+                        <View
+                          style={{
+                            position: "absolute",
+                            top: 2,
+                            left: 6,
+                            right: 6,
+                            height: 20,
+                            borderRadius: 10,
+                            backgroundColor: theme.glow,
+                          }}
+                        />
+                        <Text
+                          style={{
+                            fontSize: 13,
+                            fontWeight: "800",
+                            color: theme.text,
+                            letterSpacing: 1.2,
+                            textAlign: "center",
+                            paddingHorizontal: 12,
+                          }}
+                        >
+                          {cb.title}
+                        </Text>
+                      </View>
+                    );
+                  })}
 
-                {/* Nodes */}
-                {sectionNodes.map((n) => (
-                  <StoneNode
-                    key={n.unit.id}
-                    unit={n.unit}
-                    x={n.nx}
-                    y={n.ny}
-                    colors={colorPalette[n.unit.status]}
-                    onPress={() => handleNodePress(n.unit)}
-                    isCurrent={n.unit.status === "current"}
-                    sessionProgress={n.sessionProgress}
-                    zIndex={1000 - n.gi}
-                  />
-                ))}
-              </View>
+                  {/* Nodes */}
+                  {sectionNodes.map((n) => (
+                    <StoneNode
+                      key={n.unit.id}
+                      unit={n.unit}
+                      x={n.nx}
+                      y={n.ny}
+                      colors={colorPalette[n.unit.status]}
+                      onPress={() => handleNodePress(n.unit)}
+                      isCurrent={n.unit.status === "current"}
+                      sessionProgress={n.sessionProgress}
+                      zIndex={1000 - n.gi}
+                      skin={nodeSkin}
+                    />
+                  ))}
+                </View>
               )}
             </View>
           );
@@ -776,35 +799,39 @@ export function PathScreen({ onStartLesson, onStartReview }: Props) {
       </ScrollView>
 
       {/* Daily Practice FAB */}
-      <TouchableOpacity
-        style={[styles.fab, dueCount === 0 && styles.fabDisabled]}
-        activeOpacity={0.8}
-        onPress={() => {
-          if (dueCount === 0) {
-            Alert.alert("All Caught Up!", "You have no verses due for review. Great job!");
-            return;
-          }
-          if (!onStartReview) return;
-          const todayStr = new Date().toISOString();
-          // Get due entries, sorted by urgency (oldest due date first)
-          const sortedDueEntries = progressEntries
-            .filter((e) => e.nextReviewDate <= todayStr && e.intervalDays > 0)
-            .sort((a, b) => new Date(a.nextReviewDate).getTime() - new Date(b.nextReviewDate).getTime());
+      {dueCount > 0 && (
+        <TouchableOpacity
+          style={styles.fab}
+          activeOpacity={0.8}
+          onPress={() => {
+            if (!onStartReview) return;
+            const todayStr = new Date().toISOString();
+            // Get due entries, sorted by urgency (oldest due date first)
+            const sortedDueEntries = progressEntries
+              .filter((e) => e.nextReviewDate <= todayStr && e.intervalDays > 0)
+              .sort((a, b) => new Date(a.nextReviewDate).getTime() - new Date(b.nextReviewDate).getTime());
 
-          const cappedDueEntries = sortedDueEntries.slice(0, 5);
-          const dueRefs = new Set(cappedDueEntries.map((e) => e.verseReference));
-          const dueVerses = ALL_LESSONS.filter((l) => dueRefs.has(l.verseReference));
-          lessonStore.getState().loadLesson(dueVerses, true);
-          onStartReview();
-        }}
-      >
-        <FontAwesome5 name="book-reader" size={18} color="#FFF" style={{ marginRight: 8 }} />
-        <Text style={styles.fabText}>Daily Practice</Text>
-        {dueCount > 0 && (
+            const cappedDueEntries = sortedDueEntries.slice(0, 5);
+            const dueRefs = new Set(cappedDueEntries.map((e) => e.verseReference));
+            const dueVerses = ALL_LESSONS.filter((l) => dueRefs.has(l.verseReference));
+            lessonStore.getState().loadLesson(dueVerses, true);
+            onStartReview();
+          }}
+        >
+          <FontAwesome5 name="book-reader" size={18} color="#FFF" style={{ marginRight: 8 }} />
+          <Text style={styles.fabText}>Daily Practice</Text>
           <View style={styles.fabBadge}>
             <Text style={styles.fabBadgeText}>{dueCount}</Text>
           </View>
-        )}
+        </TouchableOpacity>
+      )}
+
+      {/* Navigation FABs */}
+      <TouchableOpacity style={styles.navFabUp} onPress={scrollToPrevPlayable}>
+        <FontAwesome5 name="chevron-up" size={16} color="#FFF" />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.navFabDown} onPress={scrollToNextPlayable}>
+        <FontAwesome5 name="chevron-down" size={16} color="#FFF" />
       </TouchableOpacity>
 
       <ChestAnimationModal visible={showChestAnimation} onClose={() => setShowChestAnimation(false)} />
@@ -951,7 +978,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   fabDisabled: {
-    backgroundColor: "#B0BEC5",
+    backgroundColor: "rgba(176, 190, 197, 0.6)",
   },
   fabText: {
     color: "#FFF",
@@ -972,6 +999,40 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 12,
     fontWeight: "800",
+  },
+  navFabUp: {
+    position: "absolute",
+    right: 20,
+    bottom: 76,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(100, 116, 139, 0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 10,
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  navFabDown: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(100, 116, 139, 0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 10,
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
   questsCard: {
     backgroundColor: "#FFF",

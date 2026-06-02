@@ -1,257 +1,974 @@
 [
     {
-        "lessonId": "lsr-01",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Gospel of God",
-        "verseReference": "Rom. 1:1",
+        "lessonId": "lsr-msg1-s1a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Story of a Marriage (1)",
+        "verseReference": "Gen. 2:21",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Deep Sleep",
+            "Rib"
+        ],
+        "decoyWords": [
+            "created a new dust",
+            "breathed into her",
+            "made a heart",
+            "woke him up"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s1a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Story of a Marriage (1)",
+        "verseReference": "Gen. 2:22",
         "difficulty": "Easy",
         "themeTags": [
-            "The Gospel",
-            "Separation"
+            "Built",
+            "Woman"
         ],
         "decoyWords": [
-            "a holy prophet",
-            "called as a priest",
-            "chosen by grace",
-            "a loyal servant"
+            "fashioned out of clay",
+            "spoke into existence",
+            "gave her a name",
+            "made an angel"
         ]
     },
     {
-        "lessonId": "lsr-02",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Gospel of God",
-        "verseReference": "Rom. 1:16",
-        "difficulty": "Medium",
-        "themeTags": [
-            "The Gospel",
-            "Salvation"
-        ],
-        "decoyWords": [
-            "the power of faith",
-            "the word of truth",
-            "the hope of glory",
-            "the grace of God"
-        ]
-    },
-    {
-        "lessonId": "lsr-03",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Gospel of God",
-        "verseReference": "Rom. 1:17",
+        "lessonId": "lsr-msg1-s1a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Story of a Marriage (1)",
+        "verseReference": "Gen. 2:23",
         "difficulty": "Hard",
         "themeTags": [
-            "Righteousness",
-            "Faith"
+            "Bone",
+            "Flesh"
         ],
         "decoyWords": [
-            "is justified by works",
-            "is made holy",
-            "lives by the law",
-            "walks in truth"
+            "dust of my dust",
+            "spirit of my spirit",
+            "blood of my blood",
+            "breath of my breath"
         ]
     },
     {
-        "lessonId": "lsr-04",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "Condemnation",
-        "verseReference": "Rom. 3:23",
+        "lessonId": "lsr-msg1-s1b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Story of a Marriage (2)",
+        "verseReference": "Gen. 2:24",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Cleave",
+            "One Flesh"
+        ],
+        "decoyWords": [
+            "remain with his parents",
+            "become one spirit",
+            "build a new house",
+            "serve the Lord together"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s1b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Story of a Marriage (2)",
+        "verseReference": "Gen. 2:25",
         "difficulty": "Easy",
         "themeTags": [
-            "Sin",
-            "Fall of Man"
+            "Naked",
+            "Not Ashamed"
         ],
         "decoyWords": [
-            "have gone astray",
-            "are under the law",
-            "need the grace",
-            "are born in sin"
+            "clothed in glory",
+            "hid from each other",
+            "afraid of the light",
+            "covered in leaves"
         ]
     },
     {
-        "lessonId": "lsr-05",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "Justification",
-        "verseReference": "Rom. 3:24",
-        "difficulty": "Medium",
-        "themeTags": [
-            "Justification",
-            "Grace"
-        ],
-        "decoyWords": [
-            "by doing good works",
-            "through keeping the law",
-            "by our own faith",
-            "through human effort"
-        ]
-    },
-    {
-        "lessonId": "lsr-06",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "Reconciliation",
-        "verseReference": "Rom. 5:10",
+        "lessonId": "lsr-msg1-s2a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (1)",
+        "verseReference": "Isa. 54:5",
         "difficulty": "Hard",
         "themeTags": [
-            "Reconciliation",
-            "Saved in Life"
+            "Maker",
+            "Husband"
         ],
         "decoyWords": [
-            "saved by His death",
-            "healed by His stripes",
-            "cleansed by His blood",
-            "forgiven of our sins"
+            "is your strict judge",
+            "is a distant king",
+            "will abandon you",
+            "is your accuser"
         ]
     },
     {
-        "lessonId": "lsr-07",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "Identification",
-        "verseReference": "Rom. 5:12",
+        "lessonId": "lsr-msg1-s2a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (1)",
+        "verseReference": "Isa. 62:5",
         "difficulty": "Medium",
         "themeTags": [
-            "The Fall",
-            "Death"
+            "Bridegroom",
+            "Rejoices"
         ],
         "decoyWords": [
-            "the law was given",
-            "the flesh was corrupted",
-            "the world was judged",
-            "the truth was hidden"
+            "the father disciplines",
+            "the king rules over",
+            "the master commands",
+            "the priest sacrifices"
         ]
     },
     {
-        "lessonId": "lsr-08",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "Identification",
-        "verseReference": "Rom. 5:17",
+        "lessonId": "lsr-msg1-s2a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (1)",
+        "verseReference": "Jer. 2:2",
         "difficulty": "Hard",
         "themeTags": [
-            "Grace",
-            "Reigning in Life"
+            "Youth",
+            "Bridals"
         ],
         "decoyWords": [
-            "will live forever",
-            "will see the kingdom",
-            "will reign in heaven",
-            "will walk in light"
+            "your past rebellion",
+            "your great wealth",
+            "your broken promises",
+            "your forgotten laws"
         ]
     },
     {
-        "lessonId": "lsr-09",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "Identification",
-        "verseReference": "Rom. 6:4",
+        "lessonId": "lsr-msg1-s2b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (2)",
+        "verseReference": "Jer. 3:1",
         "difficulty": "Medium",
         "themeTags": [
-            "Baptism",
-            "Newness of Life"
+            "Return",
+            "Lovers"
         ],
         "decoyWords": [
-            "might go to heaven",
-            "might fulfill the law",
-            "might walk in spirit",
-            "might do good works"
+            "stay where you are",
+            "seek another god",
+            "run to the mountains",
+            "offer a sacrifice"
         ]
     },
     {
-        "lessonId": "lsr-10",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "Identification",
-        "verseReference": "Rom. 6:6",
+        "lessonId": "lsr-msg1-s2b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (2)",
+        "verseReference": "Jer. 3:14",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Married",
+            "Backsliding"
+        ],
+        "decoyWords": [
+            "I am your judge",
+            "I have forsaken you",
+            "I will destroy you",
+            "I am your enemy"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s2b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (2)",
+        "verseReference": "Jer. 31:32",
         "difficulty": "Hard",
         "themeTags": [
-            "Crucifixion",
-            "The Old Man"
+            "Covenant",
+            "Husband"
         ],
         "decoyWords": [
-            "our fleshly nature",
-            "our sinful actions",
-            "our human body",
-            "our natural mind"
+            "I was a master",
+            "I broke my promise",
+            "I punished them deeply",
+            "I cast them away"
         ]
     },
     {
-        "lessonId": "lsr-11",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Spirit",
-        "verseReference": "Rom. 8:2",
+        "lessonId": "lsr-msg1-s2c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (3)",
+        "verseReference": "Ezek. 16:8",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Covenant",
+            "Mine"
+        ],
+        "decoyWords": [
+            "gave you a warning",
+            "turned my face away",
+            "made you a servant",
+            "cast you into exile"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s2c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (3)",
+        "verseReference": "Ezek. 23:5",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Mine",
+            "Doted"
+        ],
+        "decoyWords": [
+            "was completely faithful",
+            "loved only Jehovah",
+            "kept all the laws",
+            "stayed in the temple"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s2c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (3)",
+        "verseReference": "Hosea 2:7",
         "difficulty": "Easy",
         "themeTags": [
-            "The Spirit",
-            "Freedom"
+            "First Husband",
+            "Return"
         ],
         "decoyWords": [
-            "the word of truth",
-            "the power of God",
-            "the grace of Christ",
-            "the holy angels"
+            "find a new master",
+            "go to another land",
+            "build a new temple",
+            "forget my past love"
         ]
     },
     {
-        "lessonId": "lsr-12",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Spirit",
-        "verseReference": "Rom. 8:4",
-        "difficulty": "Hard",
-        "themeTags": [
-            "The Spirit",
-            "The Law"
-        ],
-        "decoyWords": [
-            "according to the mind",
-            "according to the soul",
-            "according to the rules",
-            "according to the truth"
-        ]
-    },
-    {
-        "lessonId": "lsr-13",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Spirit",
-        "verseReference": "Rom. 8:6",
+        "lessonId": "lsr-msg1-s2d",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "God as the Husband and His People as the Wife (4)",
+        "verseReference": "Hosea 2:19",
         "difficulty": "Medium",
         "themeTags": [
-            "The Mind",
-            "Life and Peace"
+            "Betroth",
+            "Forever"
         ],
         "decoyWords": [
-            "is spiritual death",
-            "is human logic",
-            "is natural weakness",
-            "is worldly sorrow"
+            "judge you harshly",
+            "leave you alone",
+            "test you daily",
+            "demand a sacrifice"
         ]
     },
     {
-        "lessonId": "lsr-14",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Spirit",
+        "lessonId": "lsr-msg1-s3a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (1)",
+        "verseReference": "S. S. 1:2",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Kisses",
+            "Wine"
+        ],
+        "decoyWords": [
+            "words are like honey",
+            "presence is like water",
+            "promises are like gold",
+            "laws are like silver"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (1)",
+        "verseReference": "S. S. 1:3",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Ointments",
+            "Name"
+        ],
+        "decoyWords": [
+            "your great power",
+            "your holy temple",
+            "your written law",
+            "your strong angels"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (1)",
+        "verseReference": "S. S. 1:9",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Steed",
+            "Pharaoh's Chariots"
+        ],
+        "decoyWords": [
+            "dove in the clefts",
+            "lily among thorns",
+            "pillar of smoke",
+            "garden enclosed"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (2)",
+        "verseReference": "S. S. 2:2",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Lily",
+            "Thorns"
+        ],
+        "decoyWords": [
+            "rose in the valley",
+            "steed in the chariot",
+            "dove in the rock",
+            "cedar in the forest"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (2)",
+        "verseReference": "S. S. 3:6",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Wilderness",
+            "Pillars of Smoke"
+        ],
+        "decoyWords": [
+            "mountains like a deer",
+            "valleys like a dove",
+            "city like a queen",
+            "temple like a priest"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (2)",
+        "verseReference": "S. S. 3:9",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Palanquin",
+            "Lebanon"
+        ],
+        "decoyWords": [
+            "chariot of fire",
+            "temple of gold",
+            "throne of silver",
+            "house of cedar"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (3)",
+        "verseReference": "S. S. 4:12",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Garden",
+            "Enclosed"
+        ],
+        "decoyWords": [
+            "city on a hill",
+            "vineyard with fruit",
+            "fountain flowing out",
+            "temple courts open"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (3)",
+        "verseReference": "S. S. 4:13",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Shoots",
+            "Orchard"
+        ],
+        "decoyWords": [
+            "walls of stone",
+            "gates of pearl",
+            "pillars of marble",
+            "streets of gold"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (3)",
+        "verseReference": "S. S. 6:4",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Tirzah",
+            "Jerusalem"
+        ],
+        "decoyWords": [
+            "a wild steed",
+            "a hidden dove",
+            "a lily in valleys",
+            "a pillar of smoke"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s3d",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Full Romance in Song of Songs (4)",
+        "verseReference": "Rev. 21:2",
+        "difficulty": "Easy",
+        "themeTags": [
+            "New Jerusalem",
+            "Bride"
+        ],
+        "decoyWords": [
+            "the great temple",
+            "the mighty army",
+            "the golden streets",
+            "the heavenly king"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s4a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Christ as the Bridegroom in the Gospels (1)",
+        "verseReference": "Matt. 9:15",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Bridegroom",
+            "Fast"
+        ],
+        "decoyWords": [
+            "rejoice greatly",
+            "build a temple",
+            "offer a sacrifice",
+            "keep the sabbath"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s4a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Christ as the Bridegroom in the Gospels (1)",
+        "verseReference": "Mark 2:19",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Bridegroom",
+            "Sons of the Bridechamber"
+        ],
+        "decoyWords": [
+            "servants of the king",
+            "priests of the temple",
+            "angels of heaven",
+            "prophets of old"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s4a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Christ as the Bridegroom in the Gospels (1)",
+        "verseReference": "Luke 5:34",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Bridegroom",
+            "Fast"
+        ],
+        "decoyWords": [
+            "offer a sacrifice",
+            "read the holy law",
+            "go into the wilderness",
+            "weep and mourn"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s4b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Christ as the Bridegroom in the Gospels (2)",
+        "verseReference": "John 3:29",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Bride",
+            "Bridegroom"
+        ],
+        "decoyWords": [
+            "the church is the building",
+            "the friend stands far away",
+            "the master has the servant",
+            "the king has the kingdom"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s4b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Christ as the Bridegroom in the Gospels (2)",
+        "verseReference": "John 3:30",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Increase",
+            "Decrease"
+        ],
+        "decoyWords": [
+            "must build a temple",
+            "must preach the word",
+            "must go away completely",
+            "must remain the same"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (1)",
+        "verseReference": "Eph. 5:25",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Love",
+            "Gave Himself"
+        ],
+        "decoyWords": [
+            "judge the church",
+            "rule over her",
+            "teach the church",
+            "save the world"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (1)",
+        "verseReference": "Eph. 5:26",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Sanctify",
+            "Washing of the Water"
+        ],
+        "decoyWords": [
+            "justify her by faith",
+            "redeem her by blood",
+            "glorify her in heaven",
+            "teach her with doctrines"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (1)",
+        "verseReference": "Eph. 5:27",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Glorious",
+            "Spot or Wrinkle"
+        ],
+        "decoyWords": [
+            "without any sin at all",
+            "having perfect knowledge",
+            "doing many good works",
+            "powerful and very strong"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (2)",
+        "verseReference": "Eph. 5:28",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Own Bodies",
+            "Loves Himself"
+        ],
+        "decoyWords": [
+            "their own children",
+            "the universal church",
+            "their own minds",
+            "the Lord Jesus"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (2)",
+        "verseReference": "Eph. 5:29",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Nourishes",
+            "Cherishes"
+        ],
+        "decoyWords": [
+            "judges and disciplines",
+            "teaches and corrects",
+            "ignores his own flesh",
+            "destroys his own body"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (2)",
+        "verseReference": "Eph. 5:30",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Members",
+            "Body"
+        ],
+        "decoyWords": [
+            "servants of His house",
+            "angels of His kingdom",
+            "sheep of His pasture",
+            "friends of His court"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (3)",
+        "verseReference": "Eph. 5:31",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Leave",
+            "One Flesh"
+        ],
+        "decoyWords": [
+            "stay with his parents",
+            "become one spirit",
+            "build a new house",
+            "worship the Lord together"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (3)",
+        "verseReference": "Eph. 5:32",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Mystery",
+            "Christ and the Church"
+        ],
+        "decoyWords": [
+            "truth regarding the angels",
+            "law of Moses revealed",
+            "prophecy of the kingdom",
+            "gospel of the new creation"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s5c",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Husband and Wife in the Epistles (3)",
+        "verseReference": "2 Cor. 11:2",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Betrothed",
+            "Pure Virgin"
+        ],
+        "decoyWords": [
+            "called you to be servants",
+            "made you a holy temple",
+            "brought you to the kingdom",
+            "baptized you into water"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s6",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Marriage of Christ and His People in Revelation",
+        "verseReference": "Rev. 19:7",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Marriage",
+            "Lamb"
+        ],
+        "decoyWords": [
+            "judgement of the king",
+            "wrath of God",
+            "the final battle",
+            "the new earth"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s6",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Marriage of Christ and His People in Revelation",
+        "verseReference": "Rev. 21:9",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Bride",
+            "Wife"
+        ],
+        "decoyWords": [
+            "the holy angels",
+            "the new temple",
+            "the great city",
+            "the golden throne"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s7",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Universal Couple and the Universal Man",
+        "verseReference": "Eph. 4:15",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Grow Up",
+            "Head"
+        ],
+        "decoyWords": [
+            "learn all the doctrines",
+            "build the physical church",
+            "perform many good works",
+            "worship in the temple"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s7",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Universal Couple and the Universal Man",
+        "verseReference": "Eph. 1:22",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Subjected",
+            "Head Over All Things"
+        ],
+        "decoyWords": [
+            "gave Him the throne",
+            "made Him the judge",
+            "crowned Him with glory",
+            "sent Him to the earth"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s7",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Universal Couple and the Universal Man",
+        "verseReference": "Eph. 1:23",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Body",
+            "Fullness"
+        ],
+        "decoyWords": [
+            "is the holy temple",
+            "is the great kingdom",
+            "is the empty vessel",
+            "is the flock of sheep"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s8",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Prophecies of Christ",
+        "verseReference": "Luke 24:27",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Moses",
+            "Prophets"
+        ],
+        "decoyWords": [
+            "He taught them the law",
+            "He showed them a sign",
+            "He gave them a new command",
+            "He rebuked their unbelief"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s8",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Prophecies of Christ",
+        "verseReference": "Luke 24:44",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Fulfilled",
+            "Psalms"
+        ],
+        "decoyWords": [
+            "must be forgotten completely",
+            "were meant for angels",
+            "were spoken in secret",
+            "are for the future only"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s8",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Prophecies of Christ",
+        "verseReference": "John 5:39",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Search",
+            "Scriptures"
+        ],
+        "decoyWords": [
+            "read the law of Moses",
+            "worship in the temple",
+            "offer your sacrifices",
+            "look to the heavens"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s9a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Church in Types, Figures, and Shadows (1)",
+        "verseReference": "Eph. 3:3",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Revelation",
+            "Mystery"
+        ],
+        "decoyWords": [
+            "by human understanding",
+            "the law of Moses",
+            "the hidden wisdom",
+            "the angelic vision"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s9a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Church in Types, Figures, and Shadows (1)",
+        "verseReference": "Eph. 3:4",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Understand",
+            "Mystery of Christ"
+        ],
+        "decoyWords": [
+            "my knowledge of the law",
+            "my deep philosophy",
+            "the secret of the angels",
+            "the future of the world"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s9a",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Church in Types, Figures, and Shadows (1)",
+        "verseReference": "Eph. 3:5",
+        "difficulty": "Hard",
+        "themeTags": [
+            "Other Generations",
+            "Apostles and Prophets"
+        ],
+        "decoyWords": [
+            "revealed to the wise men",
+            "hidden from the Spirit",
+            "known by the angels",
+            "taught in the old law"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s9b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Church in Types, Figures, and Shadows (2)",
+        "verseReference": "Eph. 3:6",
+        "difficulty": "Medium",
+        "themeTags": [
+            "Fellow Heirs",
+            "Fellow Members"
+        ],
+        "decoyWords": [
+            "strangers and aliens",
+            "servants of the kingdom",
+            "judges of the earth",
+            "priests in the temple"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s9b",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "The Church in Types, Figures, and Shadows (2)",
+        "verseReference": "S. S. 6:13",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Return",
+            "Shulammite"
+        ],
+        "decoyWords": [
+            "run away quickly",
+            "hide in the rocks",
+            "stay in the city",
+            "go to the mountains"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s10",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Justification — The Accomplishment of Salvation",
+        "verseReference": "Rom. 5:11",
+        "difficulty": "Easy",
+        "themeTags": [
+            "Boast",
+            "Reconciliation"
+        ],
+        "decoyWords": [
+            "we work for God",
+            "we fear the judgment",
+            "we offer sacrifices",
+            "we obey the law"
+        ]
+    },
+    {
+        "lessonId": "lsr-msg1-s11",
+        "bookPath": "Life-study of Romans",
+        "chapterTitle": "Message 1: A Foreword",
+        "unitTitle": "Sanctification — The Life-Process in Salvation",
         "verseReference": "Rom. 8:10",
         "difficulty": "Medium",
         "themeTags": [
-            "Christ in Us",
-            "The Spirit"
+            "Christ in You",
+            "Spirit is Life"
         ],
         "decoyWords": [
-            "your soul is alive",
-            "your mind is renewed",
-            "your flesh is healed",
-            "your heart is pure"
-        ]
-    },
-    {
-        "lessonId": "lsr-15",
-        "bookPath": "Life-Study of Romans",
-        "unitTitle": "The Spirit",
-        "verseReference": "Rom. 8:11",
-        "difficulty": "Hard",
-        "themeTags": [
-            "Resurrection",
-            "The Spirit"
-        ],
-        "decoyWords": [
-            "give you eternal glory",
-            "give life to your soul",
-            "resurrect your spirit",
-            "transform your mind"
+            "Christ is in heaven",
+            "the body is alive",
+            "the soul is redeemed",
+            "the law is fulfilled"
         ]
     }
 ]

@@ -23,125 +23,114 @@ export function ScribeQuestion({
 }: ScribeQuestionProps) {
   const [userInput, setUserInput] = useState("");
   const [hintsUsed, setHintsUsed] = useState(0);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const targetWords = targetVerse.trim().split(/\s+/);
 
   const useHint = () => {
     const currentWords = userInput.trim().split(/\s+/).filter(Boolean);
     
-    // 1. Align currentWords to targetWords
-    let targetIdx = 0;
-    const mappedIndices: number[] = [];
-    
-    for (let j = 0; j < currentWords.length; j++) {
-      const userWord = normalize(currentWords[j]);
-      let found = false;
-      for (let i = targetIdx; i < targetWords.length; i++) {
-        if (normalize(targetWords[i]) === userWord && !currentWords[j].endsWith("...")) {
-          mappedIndices[j] = i;
-          targetIdx = i + 1;
-          found = true;
-          break;
+    // 1. Find the first mismatch
+    let firstMismatchIdx = -1;
+    for (let i = 0; i < Math.max(currentWords.length, targetWords.length); i++) {
+      const uWord = i < currentWords.length ? normalize(currentWords[i]) : null;
+      const tWord = i < targetWords.length ? normalize(targetWords[i]) : null;
+      
+      if (uWord !== tWord) {
+        // If current word has "...", treat it as an incomplete replace, not a match
+        if (i < currentWords.length && currentWords[i].endsWith("...")) {
+          // It's a hint in progress
         }
-      }
-      if (!found) {
-        mappedIndices[j] = Math.min(targetIdx, targetWords.length - 1);
-        targetIdx = Math.min(targetIdx + 1, targetWords.length);
-      }
-    }
-    
-    // 2. Find the first missed or incorrect target word
-    let firstMismatchTargetIdx = -1;
-    let isReplacement = false;
-    let replacementCurrentIdx = -1;
-    let insertionCurrentIdx = -1;
-    
-    for (let i = 0; i < targetWords.length; i++) {
-      const currentWordIdx = mappedIndices.indexOf(i);
-      if (currentWordIdx === -1) {
-        firstMismatchTargetIdx = i;
-        let insertPos = 0;
-        for (let j = 0; j < currentWords.length; j++) {
-          if (mappedIndices[j] < i) {
-            insertPos = j + 1;
-          }
-        }
-        insertionCurrentIdx = insertPos;
-        break;
-      } else {
-        if (normalize(currentWords[currentWordIdx]) !== normalize(targetWords[i])) {
-          firstMismatchTargetIdx = i;
-          isReplacement = true;
-          replacementCurrentIdx = currentWordIdx;
-          break;
-        }
-      }
-    }
-    
-    if (firstMismatchTargetIdx === -1) {
-      if (currentWords.length < targetWords.length) {
-        firstMismatchTargetIdx = currentWords.length;
-      } else {
-        return;
-      }
-    }
-    
-    // 3. Hint text: progressive reveal
-    const targetWord = targetWords[firstMismatchTargetIdx];
-    const cleanWord = targetWord.replace(/[^a-zA-Z0-9]/g, "");
-    
-    let currentAttemptClean = "";
-    if (isReplacement && replacementCurrentIdx !== -1) {
-      currentAttemptClean = currentWords[replacementCurrentIdx].replace(/[^a-zA-Z0-9]/g, "");
-    }
-    
-    let correctChars = 0;
-    for (let i = 0; i < Math.min(currentAttemptClean.length, cleanWord.length); i++) {
-      if (currentAttemptClean[i].toLowerCase() === cleanWord[i].toLowerCase()) {
-        correctChars++;
-      } else {
+        firstMismatchIdx = i;
         break;
       }
     }
     
+    if (firstMismatchIdx === -1) return;
+
+    // 2. Determine action type
+    let action: 'insert' | 'replace' | 'delete' | 'append' = 'replace';
+    
+    if (firstMismatchIdx >= currentWords.length) {
+      action = 'append';
+    } else if (firstMismatchIdx >= targetWords.length) {
+      action = 'delete';
+    } else {
+      const uWord = normalize(currentWords[firstMismatchIdx]);
+      const uNext = firstMismatchIdx + 1 < currentWords.length ? normalize(currentWords[firstMismatchIdx + 1]) : null;
+      
+      const tWord = normalize(targetWords[firstMismatchIdx]);
+      const tNext = firstMismatchIdx + 1 < targetWords.length ? normalize(targetWords[firstMismatchIdx + 1]) : null;
+      
+      if (uNext === tWord) {
+        action = 'delete';
+      } else if (uWord === tNext) {
+        action = 'insert';
+      } else {
+        action = 'replace';
+      }
+    }
+
+    // 3. Generate hint text
     let hintText = "";
-    if (cleanWord.length === 0) {
-      hintText = targetWord;
-    } else {
-      if (isDailyPractice) {
-        // Daily practice: provide progressive letter hints
-        let charsToReveal = correctChars + 1;
-        let targetPrefix = "";
-        let alphaCount = 0;
-        for (let i = 0; i < targetWord.length; i++) {
-          targetPrefix += targetWord[i];
-          if (/[a-zA-Z0-9]/.test(targetWord[i])) {
-            alphaCount++;
-          }
-          if (alphaCount >= charsToReveal) {
-            break;
-          }
-        }
-        
-        if (alphaCount >= cleanWord.length) {
-          hintText = targetWord;
+    if (action !== 'delete') {
+      const targetWord = targetWords[firstMismatchIdx];
+      const cleanWord = targetWord.replace(/[^a-zA-Z0-9]/g, "");
+      
+      let currentAttemptClean = "";
+      if (action === 'replace') {
+        currentAttemptClean = currentWords[firstMismatchIdx].replace(/[^a-zA-Z0-9]/g, "");
+      }
+      
+      let correctChars = 0;
+      for (let i = 0; i < Math.min(currentAttemptClean.length, cleanWord.length); i++) {
+        if (currentAttemptClean[i].toLowerCase() === cleanWord[i].toLowerCase()) {
+          correctChars++;
         } else {
-          hintText = `${targetPrefix}...`;
+          break;
         }
-      } else {
-        // Lesson mode: provide the whole word
+      }
+      
+      if (cleanWord.length === 0) {
         hintText = targetWord;
+      } else {
+        if (isDailyPractice) {
+          let charsToReveal = correctChars + 1;
+          let targetPrefix = "";
+          let alphaCount = 0;
+          for (let i = 0; i < targetWord.length; i++) {
+            targetPrefix += targetWord[i];
+            if (/[a-zA-Z0-9]/.test(targetWord[i])) {
+              alphaCount++;
+            }
+            if (alphaCount >= charsToReveal) {
+              break;
+            }
+          }
+          
+          if (alphaCount >= cleanWord.length) {
+            hintText = targetWord;
+          } else {
+            hintText = `${targetPrefix}...`;
+          }
+        } else {
+          hintText = targetWord;
+        }
       }
     }
     
-    // 4. Update the input
     let newWords = [...currentWords];
-    if (isReplacement && replacementCurrentIdx !== -1) {
-      newWords[replacementCurrentIdx] = hintText;
-    } else if (insertionCurrentIdx !== -1) {
-      newWords.splice(insertionCurrentIdx, 0, hintText);
+    if (action === 'delete') {
+      newWords.splice(firstMismatchIdx, 1);
     } else {
-      newWords.push(hintText);
+      const hintTextWithTag = hintText + "\u200B";
+      if (action === 'replace') {
+        newWords[firstMismatchIdx] = hintTextWithTag;
+      } else if (action === 'insert') {
+        newWords.splice(firstMismatchIdx, 0, hintTextWithTag);
+      } else if (action === 'append') {
+        newWords.push(hintTextWithTag);
+      }
     }
     
     setUserInput(newWords.join(" ") + " ");
@@ -150,31 +139,83 @@ export function ScribeQuestion({
 
   const handleSubmit = () => {
     Keyboard.dismiss();
+    setIsSubmitted(true);
     const isCorrect = checkScribeAnswer(userInput, targetVerse);
     onSubmit?.(isCorrect, hintsUsed);
   };
 
+  const renderOverlayText = () => {
+    if (!userInput) {
+      return <Text style={{ color: '#999' }}>Start typing here...</Text>;
+    }
+    const tokens = userInput.split(/(\s+)/);
+    let wordIdx = 0;
+    
+    return tokens.map((token, i) => {
+      if (token.trim() === "") {
+        return <Text key={i}>{token}</Text>;
+      }
+      
+      let color = "#333";
+      let textDecorationLine: 'none' | 'underline' | 'line-through' = 'none';
+      let fontWeight = 'normal';
+      
+      const isHinted = token.includes('\u200B');
+      if (isHinted) {
+        color = "#D4891A";
+        fontWeight = '700';
+      }
+      
+      if (isSubmitted) {
+        const uWord = normalize(token);
+        const tWord = wordIdx < targetWords.length ? normalize(targetWords[wordIdx]) : null;
+        if (uWord !== tWord) {
+           color = "#E53935";
+           textDecorationLine = 'underline';
+        } else if (!isHinted) {
+           color = "#34C759";
+        }
+      }
+      
+      wordIdx++;
+      return (
+        <Text key={i} style={{ color, textDecorationLine, fontWeight: fontWeight as any }}>
+          {token.replace(/\u200B/g, '')}
+        </Text>
+      );
+    });
+  };
+
   const tooManyHints = hintsUsed > Math.floor(targetWords.length / 2);
-  const allRevealed = userInput.trim().split(/\s+/).filter(Boolean).length >= targetWords.length;
+  const allRevealed = checkScribeAnswer(userInput, targetVerse);
 
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Type the verse from memory:</Text>
         <Text style={styles.subLabel}>Capitalization, punctuation, and extra spacing are ignored — just focus on the words!</Text>
-        <TextInput
-          style={styles.input}
-          multiline
-          autoCorrect={false}
-          autoCapitalize="none"
-          spellCheck={false}
-          value={userInput}
-          onChangeText={setUserInput}
-          placeholder="Start typing here..."
-          placeholderTextColor="#999"
-          returnKeyType="done"
-          onSubmitEditing={Keyboard.dismiss}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={[styles.textShared, styles.input]}
+            multiline
+            autoCorrect={false}
+            autoCapitalize="none"
+            spellCheck={false}
+            value={userInput}
+            onChangeText={(text) => {
+              setUserInput(text);
+              if (isSubmitted) setIsSubmitted(false);
+            }}
+            placeholderTextColor="transparent"
+            returnKeyType="done"
+            selectionColor="#4A90D9"
+            onSubmitEditing={Keyboard.dismiss}
+            editable={!isSubmitted}
+          />
+          <Text style={[styles.textShared, styles.overlay]}>
+            {renderOverlayText()}
+          </Text>
+        </View>
       </View>
 
       {/* Hint Information Banner */}
@@ -239,17 +280,31 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 18,
   },
-  input: {
+  inputWrapper: {
     flex: 1,
     maxHeight: 250,
     backgroundColor: "#F9F9F9",
     borderWidth: 2,
     borderColor: "#E0E0E0",
     borderRadius: 12,
+    position: 'relative',
+  },
+  textShared: {
     padding: 16,
     fontSize: 18,
-    color: "#333",
+    lineHeight: 24,
     textAlignVertical: "top",
+    margin: 0,
+  },
+  input: {
+    flex: 1,
+    color: "transparent",
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    pointerEvents: 'none',
+    color: '#333',
   },
   buttonRow: {
     flexDirection: "row",

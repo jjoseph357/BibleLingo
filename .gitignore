@@ -3,3 +3,4 @@
 .claw
 .expo
 dist/
+serviceAccountKey.json

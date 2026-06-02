@@ -200,7 +200,8 @@ export function CustomPathsScreen({ onStartLesson }: Props) {
     if (!selectedPath) return null;
     const nodeCount = selectedPath.groups.length;
     const canvasHeight = Math.max(SCREEN_WIDTH, nodeCount * NODE_SPACING_Y + 180);
-    const decorations = generateDecorations(nodeCount, 0);
+    const yArray = Array.from({ length: nodeCount }, (_, i) => i * NODE_SPACING_Y);
+    const decorations = generateDecorations(yArray, 0);
 
     return (
       <View style={{ flex: 1 }}>
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   playPathBtn: {
-    backgroundColor: "#4A90D9 ",
+    backgroundColor: "#4A90D9",
     width: 36,
     height: 36,
     borderRadius: 18,

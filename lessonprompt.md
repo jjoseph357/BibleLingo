@@ -35,7 +35,7 @@ interface LessonCard {
   - For the `lessonId`, use the base format `{book_abbr}-c{chapter_num}-s{section_num}` (e.g., `becl-v1-c3-s1` for Section 1 of Chapter 3 of Basic Elements of the Christian Life, Vol 1).
 - **Group 2 to 3 Verses Per Lesson**: A single lesson (sharing the exact same `lessonId`) should contain **exactly 2 to 3 verses**. 
   - If a section contains up to 3 verses, they should all share the base Lesson ID (e.g. `becl-v1-c3-s1`) and the same `unitTitle`.
-  - If a section contains more than 3 verses, split them into sequential chunks of 2 to 3 verses each. You **MUST** append sequential letter suffixes to the base Lesson ID (e.g., `becl-v1-c3-s1a`, `becl-v1-c3-s1b`) AND you **MUST** append part numbers to the `unitTitle` (e.g., `Separation from God (Part 1)`, `Separation from God (Part 2)`). This is critical because the game groups stepping stones by `unitTitle`! For consistency, always use `(Part X)`, never use `(Cont.)`.
+  - If a section contains more than 3 verses, split them into sequential chunks of 2 to 3 verses each. You **MUST** append sequential letter suffixes to the base Lesson ID (e.g., `becl-v1-c3-s1a`, `becl-v1-c3-s1b`) AND you **MUST** append part numbers to the `unitTitle` (e.g., `Separation from God (1)`, `Separation from God (2)`). This is critical because the game groups stepping stones by `unitTitle`! For consistency, always use `(X)`, never use `(Cont.)`.
 - **Reference Standard Abbreviations**: Always use standard, abbreviated book names in `verseReference` (e.g., "Gen.", "Rom.", "2 Cor.", "1 Thes.", "John", "Matt.", "Col.", "Phil.", "Rev.").
 
 ---
@@ -59,8 +59,8 @@ For each extracted verse, we will generate decoy answers for multiple-choice que
 You will be provided with input in this format:
 
 ### METADATA
-- **Book Title**: [Book Title]
-- **Base ID Prefix**: [Base ID Prefix]
+- **Book Title**: The Economy of God
+- **Base ID Prefix**: eog-c3
 
 ### SOURCE TEXT
 [Insert study chapter text here, including chapter title and section headings]

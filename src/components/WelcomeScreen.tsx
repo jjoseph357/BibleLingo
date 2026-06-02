@@ -13,9 +13,10 @@ import {
 import { progressStore } from "../stores/progressStore";
 import { Filter } from 'bad-words';
 import { db, auth, isFirebaseConfigured } from '../services/firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, increment } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { FontAwesome5 } from "@expo/vector-icons";
+import { isUsernameTaken } from "../utils/username";
 
 interface WelcomeScreenProps {
   onDismiss: () => void;
@@ -91,13 +92,25 @@ export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
       }
 
       if (mode === "signup") {
+        progressStore.getState().setIsSigningUp(true);
+        const trimmedName = nameInput.trim();
+        
+        // Authenticate first so Firestore rules allow us to query the users collection
         const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
         const uid = userCredential.user.uid;
-        const trimmedName = nameInput.trim();
+
+        // Check uniqueness now that we are authenticated
+        const taken = await isUsernameTaken(trimmedName);
+        if (taken) {
+          // Rollback if the username is taken
+          await userCredential.user.delete();
+          throw new Error("Username is already taken.");
+        }
 
         await setDoc(doc(db, 'users', uid), {
           username: trimmedName,
           usernameLower: trimmedName.toLowerCase(),
+          hasUsedFreeNameChange: false,
           xp: 0,
           weeklyXp: 0,
           streakDays: 0,
@@ -107,6 +120,14 @@ export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
           leagueTier: 'Bronze',
           lastActive: new Date().toISOString()
         });
+
+        // Increment global user count
+        try {
+          const statsRef = doc(db, 'stats', 'achievements');
+          await setDoc(statsRef, { totalUsers: increment(1) }, { merge: true });
+        } catch (e) {
+          console.warn("Failed to update global stats:", e);
+        }
 
         progressStore.getState().setUid(uid);
         progressStore.getState().setUsername(trimmedName);
@@ -123,6 +144,7 @@ export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
           const restoreData: any = {
             uid: uid,
             username: data.username || "Player",
+            hasUsedFreeNameChange: data.hasUsedFreeNameChange || false,
             xp: data.xp || 0,
             weeklyXp: data.weeklyXp || 0,
             streakDays: data.streakDays || 0,
@@ -148,12 +170,14 @@ export function WelcomeScreen({ onDismiss }: WelcomeScreenProps) {
       onDismiss();
     } catch (err: any) {
       console.error("Firebase auth error:", err);
-      let msg = "Authentication failed.";
-      if (err.code === "auth/email-already-in-use") msg = "Email is already in use.";
+      let msg = err.message || "Authentication failed.";
+      if (msg.includes("Username is already taken")) msg = "Username is already taken.";
+      else if (err.code === "auth/email-already-in-use") msg = "Email is already in use.";
       else if (err.code === "auth/invalid-credential") msg = "Invalid email or password.";
       else if (err.code === "auth/weak-password") msg = "Password should be at least 6 characters.";
       setError(msg);
     } finally {
+      progressStore.getState().setIsSigningUp(false);
       setIsLoading(false);
     }
   };

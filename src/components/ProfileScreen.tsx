@@ -4,17 +4,29 @@ import { useStore } from "zustand";
 import { progressStore } from "../stores/progressStore";
 import { ALL_ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES, checkAchievements } from "../utils/achievementEngine";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { auth } from "../services/firebase";
+import { db, auth, isFirebaseConfigured } from "../services/firebase";
+import { getDoc, doc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 
 export function ProfileScreen() {
   const state = useStore(progressStore);
   const { xp, streakDays, achievements, perfectScribes, username, uid } = state;
 
+  const [stats, setStats] = React.useState<{ totalUsers: number, counts: Record<string, number> } | null>(null);
+
   useEffect(() => {
-    // Auto-heal: Ensure any achievements earned (e.g., via Shop, Dev Tools, etc.)
-    // that missed the post-lesson check get awarded when viewing the profile!
+    // Auto-heal: Ensure any achievements earned get awarded
     checkAchievements();
+    
+    // Fetch global achievement stats
+    if (isFirebaseConfigured && db && auth && auth.currentUser) {
+      getDoc(doc(db, 'stats', 'achievements')).then(docSnap => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setStats({ totalUsers: data.totalUsers || 1, counts: data.counts || {} });
+        }
+      }).catch(err => console.warn("Failed to fetch achievement stats", err));
+    }
   }, [state]);
 
   const getAchievementProgress = (achievementId: string) => {
@@ -27,11 +39,30 @@ export function ProfileScreen() {
     return { value: 0, requirement: 1 };
   };
 
+  const getPercentage = (id: string) => {
+    if (!stats || stats.totalUsers === 0) return 0;
+    const count = stats.counts[id] || 0;
+    return (count / stats.totalUsers) * 100;
+  };
+
   const sortedAchievements = [...ALL_ACHIEVEMENTS].sort((a, b) => {
     const aUnlocked = achievements.includes(a.id);
     const bUnlocked = achievements.includes(b.id);
+    
     if (aUnlocked && !bUnlocked) return -1;
     if (!aUnlocked && bUnlocked) return 1;
+
+    const aPct = getPercentage(a.id);
+    const bPct = getPercentage(b.id);
+
+    if (aUnlocked && bUnlocked) {
+      // Unlocked: rarest first (lowest percentage)
+      if (aPct !== bPct) return aPct - bPct;
+    } else {
+      // Locked: easiest first (highest percentage)
+      if (aPct !== bPct) return bPct - aPct;
+    }
+    
     return 0;
   });
 
@@ -97,6 +128,9 @@ export function ProfileScreen() {
           const prog = getAchievementProgress(achievement.id);
           const progressRatio = Math.min(prog.value / prog.requirement, 1);
           
+          const pct = getPercentage(achievement.id);
+          const isGold = pct > 0 && pct < 5 && stats !== null;
+
           return (
             <View 
               key={achievement.id} 
@@ -105,7 +139,7 @@ export function ProfileScreen() {
                 !isUnlocked && styles.achievementLocked
               ]}
             >
-              <View style={[styles.iconWrapper, isUnlocked && styles.iconUnlocked]}>
+              <View style={[styles.iconWrapper, isUnlocked && (isGold ? styles.iconGold : styles.iconUnlocked)]}>
                 {isUnlocked ? (
                   <FontAwesome5 name="medal" size={24} color="#FFF" />
                 ) : (
@@ -121,6 +155,11 @@ export function ProfileScreen() {
                 <Text style={[styles.achievementTitle, !isUnlocked && styles.textLocked]}>
                   {achievement.title}
                 </Text>
+                {stats !== null && (
+                  <Text style={[styles.rarityText, isUnlocked && isGold && styles.rarityGold]}>
+                    {pct.toFixed(1)}% of players have this
+                  </Text>
+                )}
                 <Text style={styles.achievementDesc}>
                   {achievement.description}
                 </Text>
@@ -227,6 +266,9 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   iconUnlocked: {
+    backgroundColor: "#4A90D9",
+  },
+  iconGold: {
     backgroundColor: "#F5A623",
   },
   iconLocked: {
@@ -239,10 +281,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#333",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   textLocked: {
     color: "#888",
+  },
+  rarityText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#888",
+    marginBottom: 4,
+  },
+  rarityGold: {
+    color: "#F5A623",
   },
   achievementDesc: {
     fontSize: 14,

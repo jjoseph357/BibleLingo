@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import { WordItem } from "../utils/scramble";
 import { buildMissingLinkState, checkMissingLinkAnswer } from "../utils/missingLink";
