@@ -1,0 +1,18 @@
+{
+  "name": "BibleLingo",
+  "short_name": "BibleLingo",
+  "description": "Gamified Bible verse memorization app",
+  "start_url": "/BibleLingo/",
+  "scope": "/BibleLingo/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121824",
+  "theme_color": "#4A90D9",
+  "icons": [
+    {
+      "src": "/BibleLingo/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
